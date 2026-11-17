@@ -1,0 +1,103 @@
+/**
+ * PrivacySheet — 개인정보 처리방침을 읽고 닫는 시트. sheet.css 위에 얹습니다.
+ *
+ * 일정 변경 시트와 다른 점은 둘입니다.
+ *
+ * 1. 좁은 화면에서도 머리글(제목·닫기)이 보입니다. 일정 변경은 무엇을 고르는지가
+ *    목록으로 드러나지만, 긴 글은 몇 줄만 읽어서는 무슨 문서인지 알 수 없습니다.
+ *    끝까지 내려가지 않고 닫는 사람이 대부분이라 닫기도 위에 둡니다.
+ * 2. 아래 버튼 줄이 없습니다. 고를 것이 없는 글이라, 남는 자리는 모두 본문이 씁니다.
+ */
+
+/* 좁은 화면: 판이 이미 좌우·위 여백을 갖고 있어 머리글은 줄만 세웁니다. */
+.privacy-sheet .sheet__head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-300);
+  /* 닫기 버튼이 제 좌우 여백을 품고 있어, 그만큼 오른쪽으로 내보내 글 끝과 맞춥니다. */
+  margin-inline-end: calc(var(--spacing-300) * -1);
+}
+
+.privacy-sheet__body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--colors-fg-low);
+  font-size: var(--typography-body-m-regular-font-size);
+  font-weight: var(--typography-body-m-regular-font-weight);
+  line-height: var(--typography-body-m-regular-line-height);
+  letter-spacing: var(--typography-body-m-regular-letter-spacing);
+  /* 한국어 문장이 낱자에서 꺾이지 않게 어절에서 꺾습니다. */
+  word-break: keep-all;
+  /* 스크롤바는 얇게 자리만 잡아 두고, 굴리는 동안에만 보입니다(.is-scrolling,
+     privacy-sheet.js). 가만히 읽는 동안 글 옆에 막대가 서 있으면 시선을 끕니다.
+     자리를 늘 잡아 두는 것은 나타날 때 글 폭이 바뀌어 줄이 다시 꺾이지 않게 하려는
+     것입니다. */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+/* 색은 검정 계열의 반투명(seriousGray 900 의 25%)입니다 — 회색을 고르면 바탕이 바뀔
+   때마다 다시 골라야 하지만, 반투명은 어느 바탕 위에서든 같은 농도로 보입니다. */
+.privacy-sheet__body.is-scrolling {
+  scrollbar-color: var(--_colors-serious-gray-alpha900-25) transparent;
+}
+
+.privacy-sheet__meta,
+.privacy-sheet__empty {
+  margin: 0;
+  color: var(--colors-fg-lowest);
+  font-size: var(--typography-body-s-regular-font-size);
+  line-height: var(--typography-body-s-regular-line-height);
+}
+
+.privacy-sheet__empty { margin-block-start: var(--spacing-200); }
+
+.privacy-sheet__article { margin-block-start: var(--spacing-600); }
+
+.privacy-sheet__article h3 {
+  margin: 0;
+  color: var(--colors-fg);
+  font-size: var(--typography-body-m-semibold-font-size);
+  font-weight: var(--typography-body-m-semibold-font-weight);
+  line-height: var(--typography-body-m-semibold-line-height);
+  letter-spacing: var(--typography-body-m-semibold-letter-spacing);
+}
+
+.privacy-sheet__article p { margin: var(--spacing-150) 0 0; }
+
+.privacy-sheet__article :is(ul, ol) {
+  margin: var(--spacing-150) 0 0;
+  padding-inline-start: var(--spacing-500);
+}
+
+/* 항목 안의 항목(수탁업체 아래 위탁업무 같은)은 위 항목에 붙어 읽혀야 해서 덜 띄웁니다. */
+.privacy-sheet__article li :is(ul, ol) { margin-block-start: var(--spacing-100); }
+
+.privacy-sheet__article li + li { margin-block-start: var(--spacing-100); }
+
+/* 연락처·기관 주소. 회색 글 사이의 다른 회색은 잘 보이지 않아 밑줄로 구분합니다. */
+.privacy-sheet__article a {
+  color: var(--colors-fg);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  /* 긴 주소가 좁은 화면에서 줄 밖으로 삐져나가지 않게 아무 데서나 꺾습니다. */
+  overflow-wrap: anywhere;
+}
+
+/* 넓은 화면: 판이 여백을 갖지 않는 모달이라 본문이 직접 좌우·아래 여백을 둡니다. */
+@media (min-width: 961px) {
+  .privacy-sheet .sheet__head { margin-inline-end: 0; }
+
+  /* 스크롤바를 판 가장자리에서 안쪽으로 들입니다. 가장자리에 붙으면 둥근 아래
+     모서리에 걸려 잘리고, 판 테두리처럼 보입니다. 들인 만큼 안쪽 여백에서 빼서
+     글의 좌우 끝은 머리글 제목과 그대로 맞습니다. */
+  .privacy-sheet__body {
+    margin: 0 var(--spacing-100) var(--spacing-300) 0;
+    padding: 0 calc(var(--_sheet-modal-padding-inline) - var(--spacing-100))
+      calc(var(--_sheet-modal-padding-inline) - var(--spacing-300))
+      var(--_sheet-modal-padding-inline);
+  }
+}

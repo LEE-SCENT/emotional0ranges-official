@@ -1,0 +1,84 @@
+/**
+ * TopBar — 화면 맨 위에 눕는 줄.
+ *
+ *   <div class="top-bar">
+ *     <button class="btn btn--ghost btn--medium btn--icon-only" aria-label="뒤로">…</button>
+ *     <p class="top-bar__label body-m-medium">모임 · 티키타카</p>
+ *     <div class="btn-group btn-group--horizontal"> … </div>
+ *   </div>
+ *
+ * 왼쪽은 나가는 길(뒤로·닫기), 오른쪽은 이 화면에서 할 수 있는 것, 가운데는 지금
+ * 어디인지입니다. 상세 화면의 모바일 헤더와 사진 확대보기가 이것을 함께 씁니다 —
+ * Figma 에서도 같은 컴포넌트입니다.
+ *
+ * 가운데 글자는 absolute 로 띄웁니다. 좌우 사이에 flex 로 끼우면 양쪽 버튼 개수가
+ * 다를 때 글자가 화면 가운데에서 밀립니다. 상세 화면은 오른쪽에 둘, 확대보기는
+ * 하나라 실제로 어긋납니다.
+ *
+ * 높이(72)를 직접 주지 않습니다. 여백 16 두 번과 버튼 40 이 쌓여 그 값이 나오므로,
+ * 버튼이 커지면 줄도 따라 커져야 합니다.
+ */
+
+.top-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--_top-bar-gap);
+  padding: var(--_top-bar-padding-block) var(--_top-bar-padding-inline);
+  background: var(--colors-bg);
+  font-family: var(--_font-family-base);
+}
+
+.top-bar__label {
+  position: absolute;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  margin: 0;
+  /* 좌우 버튼 자리를 침범하지 않는 선까지만. 넘치면 말줄임으로 접습니다. */
+  max-inline-size: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--_top-bar-label-fg);
+  /* 내용이 바뀌어도 글자가 좌우로 흔들리지 않도록 숫자 폭을 고정합니다. */
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
+/* 아이콘은 fg 입니다. ghost 버튼의 기본값은 한 단계 옅은 회색이라 본문 옆에서는
+   알맞지만, 이 줄에서는 아이콘 셋이 전부라 옅으면 눌러야 할 것으로 보이지 않습니다. */
+.top-bar .btn--ghost { color: var(--colors-fg); }
+
+/* 오른쪽에 버튼이 없을 때도 가운데 글자가 가운데에 남아야 합니다. justify-content
+   가 홀로 남은 왼쪽 버튼을 붙여둘 뿐이라 따로 할 일은 없지만, 빈 자리를 채우는
+   요소를 두지 않는다는 뜻으로 적어둡니다. */
+.top-bar > * { flex: none; }
+
+/* 줄의 좌우 여백(8)은 아이콘만 있는 ghost 버튼에 맞춘 값입니다 — 버튼(40) 안쪽 여백까지
+   더해 아이콘이 본문 여백(16) 자리에 섭니다. 테두리가 있는 글자 버튼(프로필 미리보기)은
+   테두리가 곧 가장자리라 8 에 서면 화면 끝에 붙어 보이고 본문 줄과도 어긋납니다. 그런
+   버튼은 본문 여백에 맞춰 안으로 들입니다. */
+.top-bar > .btn:not(.btn--icon-only):last-child {
+  margin-inline-end: calc(var(--container-gutter-base) - var(--_top-bar-padding-inline));
+}
+
+/* ---- 페이지의 머리 ------------------------------------------------------
+   좁은 화면에서 GNB 를 대신합니다. 한 가지 일을 하러 들어온 화면 — 모임 하나를
+   읽거나, 신청을 마치거나 — 에서 필요한 것은 사이트 메뉴가 아니라 나가는 길입니다.
+   좁은 화면의 GNB 는 로고와 햄버거뿐이라, 둘 다 지금 하려는 일과 상관이 없습니다.
+*/
+
+.top-bar.top-bar--page { display: none; }
+
+@media (max-width: 960px) {
+  body:has(.top-bar--page) > .gnb { display: none; }
+
+  .top-bar.top-bar--page {
+    display: flex;
+    /* 읽어 내려가는 동안 남습니다. 나가는 길이 화면 밖으로 나가면 다시 위까지
+       올라가야 합니다. */
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 20;
+  }
+}

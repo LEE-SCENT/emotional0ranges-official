@@ -1,0 +1,97 @@
+/**
+ * 화면 브레이크포인트와 콘텐츠 컨테이너.
+ *
+ *   <div class="container"> … </div>
+ *
+ * 티어는 넷입니다. 가장 좁은 쪽이 기본이고 위로 올라가며 덮어씁니다(mobile first).
+ *
+ *   ~440      좌우 여백 16
+ *   441~960   좌우 여백 16
+ *   961~1600  좌우 여백 24, 최대폭 1280
+ *   1601~     최대폭 1280 (.container--wide 는 1600)
+ *
+ * ⚠️ 미디어 쿼리는 var() 를 받지 못해 --breakpoint-* 토큰을 조건에 쓸 수 없습니다.
+ *    아래 숫자와 tokens/semantic.layout.json 을 항상 함께 고쳐야 합니다.
+ *    441 / 961 / 1601 세 곳뿐이니 검색으로 찾을 수 있습니다.
+ */
+
+/* hidden 은 언제나 감춥니다.
+   브라우저 기본 규칙([hidden] { display: none })은 클래스 하나에도 밀립니다. 그래서
+   .summary-card__banner 처럼 display 를 정해둔 요소에 hidden 을 붙이면 그대로
+   보입니다 — 당일이 아닌 일정에 "당일 환불 불가" 배너가 떠 있었습니다.
+   컴포넌트마다 [hidden] 을 다시 적어 막느니 여기서 한 번에 못 박습니다. */
+[hidden] { display: none !important; }
+
+/* 서체도 한 번 못 박습니다.
+   컴포넌트마다 제 서체를 다시 깔고 있지만(25곳), 한 곳이 빠지면 그 자리는 브라우저
+   기본 서체로 떨어집니다. 한글은 시스템 글꼴로 대체돼 티가 나지 않고 숫자만 명조로
+   보여서, 달력의 날짜가 명조로 나온 뒤에야 알았습니다(find-bar 가 없는 토큰을
+   가리키고 있었습니다). 위 [hidden] 과 같은 이유로 여기서 한 번에 막습니다.
+   ⚠️ 서체를 바꾸는 자리가 아닙니다 — 값은 컴포넌트가 쓰는 것과 같은 토큰입니다. */
+body { font-family: var(--_font-family-base); }
+
+/* 바탕과 글자색도 토큰에서 받습니다. 밝은 화면에서는 브라우저 기본(흰 바탕·검은 글)과
+   같아 아무것도 바뀌지 않지만, 테마(data-theme)가 bg·fg 를 바꾸면 화면 전체가 따라옵니다.
+   비워두면 카드와 GNB 만 어두워지고 그 사이 바탕은 흰색으로 남습니다. */
+body {
+  background: var(--colors-bg);
+  color: var(--colors-fg);
+}
+
+/* 프라이빗은 어두운 화면입니다. 스크롤바·입력칸의 브라우저 기본 모양도 어둡게 그립니다. */
+:root[data-theme="private"] { color-scheme: dark; }
+
+/* 밝은 화면과 프라이빗(어두운 화면)을 오갈 때 디졸브로 바꿉니다. 흰 화면이 한 번에
+   검게 뒤집히면 깜빡인 것처럼 보입니다. 같은 테마끼리 넘어갈 때는 theme-transition.js
+   가 건너뜁니다 — 여기서는 모든 페이지가 전환에 참여한다는 것만 정합니다(양쪽 페이지가
+   모두 켜야 동작합니다). */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--_duration-slow);
+  animation-timing-function: var(--_easing-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* 스크롤바 자리를 늘 비워둡니다.
+   팝업이 열리는 동안에는 뒤 페이지의 스크롤을 잠그는데(overflow:hidden), 그때
+   스크롤바가 사라지면서 본문이 그 폭만큼 옆으로 밀립니다. 자리를 처음부터 비워두면
+   잠기든 말든 폭이 같습니다. */
+:root { scrollbar-gutter: stable; }
+
+.container {
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin-inline: auto;
+  padding-inline: var(--container-gutter-base);
+}
+
+/* 441~960 은 ~440 과 여백이 같습니다. 티어가 나뉘어 있는 건 이 안에서 레이아웃이
+   달라지기 때문이지 여백 때문이 아니라, 여기에는 별도 규칙이 없습니다.
+
+   ⚠️ 화면에 붙어 사는 것들(GNB · 하단 CTA · 알림 띠)은 컨테이너 밖이라 이 여백을
+      받지 못합니다. 그쪽은 제 파일에서 같은 토큰을 봅니다 — 한 화면에서 위아래로
+      선이 어긋나면 그것이 먼저 보입니다. */
+
+@media (min-width: 961px) {
+  .container {
+    padding-inline: var(--container-gutter-md);
+    max-inline-size: calc(var(--container-max-width-md) + 2 * var(--container-gutter-md));
+  }
+}
+
+@media (min-width: 1601px) {
+  .container {
+    max-inline-size: calc(var(--container-max-width-lg) + 2 * var(--container-gutter-md));
+  }
+
+  /* KV 처럼 화면을 크게 쓰는 영역만 한 단계 넓게 갑니다.
+     본문 기본 폭(1280)을 함께 넓히면 글줄이 너무 길어집니다. */
+  .container--wide {
+    max-inline-size: calc(var(--container-max-width-wide) + 2 * var(--container-gutter-md));
+  }
+}

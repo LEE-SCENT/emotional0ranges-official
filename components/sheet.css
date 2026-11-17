@@ -1,0 +1,339 @@
+/**
+ * Sheet — 화면 아래에서 올라오는 시트.
+ *
+ *   <dialog class="sheet" id="apply-sheet">
+ *     <div class="sheet__panel"> … </div>
+ *   </dialog>
+ *
+ *   .sheet--inline  넓은 화면에서는 시트가 아니라, 감싼 것이 없는 것처럼
+ *                   그 자리에 내용을 그대로 둡니다.
+ *   .sheet--modal   넓은 화면에서는 아래에 붙지 않고 화면 가운데에 뜹니다.
+ *
+ * 상세 화면의 일정 목록이 --inline 을 씁니다. 넓은 화면에서는 본문 옆 단에 서고
+ * 좁아지면 시트가 되는데, 목록을 복사해 두 벌 만들지 않았습니다 — 라디오 이름이
+ * 같은 목록이 문서에 둘 있으면 어느 쪽에서 고른 것인지 서로 모르게 되고, 화면 폭을
+ * 바꾸는 순간 고른 것이 사라집니다. 대신 961 부터 <dialog> 와 판이 display:contents
+ * 로 자리에서 빠집니다.
+ *
+ * 신청·결제 화면의 일정 변경은 --modal 을 씁니다. 그 화면에는 목록을 늘 펼쳐둘 자리가
+ * 없어 어느 폭에서든 띄우는데, 넓은 화면에서 화면 아래에 붙으면 눈이 가 있던 자리에서
+ * 한참 떨어진 곳에 뜹니다. 좁은 화면에서는 그대로 아래에서 올라옵니다 — 손가락이
+ * 닿는 자리가 거기입니다.
+ *
+ * 시트 안에서만 필요한 규칙은 [open] 에 겁니다. --inline 은 넓은 화면에서 열리는
+ * 일이 없으므로, 그 하나로 "지금 시트인가"가 갈립니다.
+ *
+ * showModal() 이 주는 것 — Esc 로 닫기, 뒤 화면을 읽지도 누르지도 못하게 막기,
+ * 초점 가두기 — 은 사진 확대보기와 같은 이유로 씁니다.
+ */
+
+.sheet {
+  /* dialog 의 기본값(가운데 뜨는 작은 상자)을 지우고 화면 전체를 덮습니다.
+     판은 그 안에서 아래에 붙습니다. */
+  inline-size: 100%;
+  max-inline-size: 100%;
+  /* 100% 가 아니라 100dvh 입니다. iOS 사파리에서 모달의 기준이 되는 상자는 주소창
+     ·툴바가 덮은 자리까지 포함해, 100% 로 두면 상자가 화면보다 커집니다. 아래에
+     붙는 것(시트의 신청 버튼)이 툴바 뒤로 들어가 보이지 않았습니다. */
+  block-size: 100dvh;
+  max-block-size: 100dvh;
+  padding: 0;
+  border: 0;
+  background: none;
+  /* dialog 의 기본값은 overflow:auto 입니다. 시트가 올라오는 동안 판이 아래로
+     밀려나 있어 그 순간만 상자가 넘치고, 스크롤바가 나타났다 사라집니다.
+     바닥에 붙는 판이라 넘치는 부분은 볼 일이 없으므로 잘라둡니다. */
+  overflow: clip;
+  /* 자리를 잡는 값들은 [open] 이 아니라 여기에 둡니다 — display 만 allow-discrete 로
+     전환되고 나머지는 닫는 순간 바로 풀려, 판이 한 번 튄 뒤에 사라집니다. */
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet[open] { display: flex; }
+
+.sheet::backdrop { background: var(--_sheet-backdrop); }
+
+.sheet__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--_sheet-gap);
+  box-sizing: border-box;
+  /* 아래에 붙는 동안에는 화면 폭을 그대로 씁니다. 바닥에 붙은 판이 좌우로 떠 있으면
+     어디에서 올라온 것인지 알 수 없습니다. 폭을 묶는 것은 가운데 뜨는 모달뿐입니다. */
+  inline-size: 100%;
+  /* 높이는 내용이 정하고 여기서 멈춥니다. 화면을 다 덮으면 시트를 닫고 돌아갈
+     곳이 보이지 않습니다. */
+  max-block-size: var(--_sheet-max-height);
+  padding: var(--_sheet-padding-block) var(--_sheet-padding-inline)
+    var(--_sheet-padding-block-end);
+  /* 홈 표시줄이 있는 기기에서는 아래를 그만큼 더 비웁니다. */
+  padding-block-end: calc(var(--_sheet-padding-block-end) + env(safe-area-inset-bottom));
+  background: var(--_sheet-bg);
+  border-start-start-radius: var(--_sheet-rounded);
+  border-start-end-radius: var(--_sheet-rounded);
+  box-shadow: var(--_sheet-shadow);
+}
+
+/* 초점은 판이 받습니다(sheet.js) — 열자마자 목록의 첫 칸이나 버튼에 테가 둘리지
+   않게 하려는 것이라, 판에 대신 테를 두르면 아무것도 나아지지 않습니다. */
+.sheet__panel:focus { outline: none; }
+
+/* ---- 여닫는 모션 --------------------------------------------------------
+   아래에서 올라옵니다. 어디에서 온 것인지가 곧 어디로 닫히는지라, 눌렀던 버튼
+   쪽에서 자라나야 닫을 방향도 짐작이 됩니다.
+
+   display 와 top layer 는 중간값이 없어 그냥은 전환되지 않습니다. allow-discrete
+   를 붙여야 닫히는 동안 시트가 화면에 남아 내려가는 것이 보입니다. */
+
+.sheet,
+.sheet::backdrop {
+  transition:
+    opacity var(--_duration-base) var(--_easing-standard),
+    display var(--_duration-base) allow-discrete,
+    overlay var(--_duration-base) allow-discrete;
+}
+
+.sheet__panel {
+  transition: translate var(--_duration-base) var(--_easing-decelerate);
+}
+
+.sheet { opacity: 0; }
+.sheet[open] { opacity: 1; }
+.sheet::backdrop { opacity: 0; }
+.sheet[open]::backdrop { opacity: 1; }
+.sheet:not([open]) .sheet__panel { translate: 0 100%; }
+
+@starting-style {
+  .sheet[open] { opacity: 0; }
+  .sheet[open]::backdrop { opacity: 0; }
+  .sheet[open] .sheet__panel { translate: 0 100%; }
+}
+
+/* ---- 시트 안의 일정 목록 ------------------------------------------------
+   본문 옆에 설 때는 목록이 페이지와 함께 스크롤되지만, 시트 안에서는 목록만
+   움직이고 아래 버튼은 남습니다. 고르는 도중에 버튼이 밀려 나가면 다 고르고 나서
+   다시 찾아 내려가야 합니다.
+
+   [open] 에 거는 것은 --inline 때문입니다. 넓은 화면에서 자리에 빠져 있는 그
+   목록은 열린 적이 없어 이 규칙들을 받지 않습니다. */
+
+/* 상세 화면은 일정을 <aside class="detail-side"> 로 감싸 본문 옆에 세웁니다. 시트가
+   되면 그 aside 가 판과 목록 사이에 남는데, 옆 단에 설 때의 flex:none 을 그대로 들고
+   있어 내용만큼 자랍니다 — 판이 멈춘 자리 아래로 목록이 흘러넘치고 신청 버튼이 화면
+   밖으로 밀려납니다. 시트 안에서는 판의 높이 제약을 목록까지 그대로 내려보냅니다.
+   따라다니는 것(sticky)도 시트 안에서는 할 일이 없습니다. */
+.sheet[open] .detail-side {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.sheet[open] .schedule {
+  min-block-size: 0;
+  /* 목록과 버튼 줄은 맞닿습니다 — 잘린 자리에 긋는 선이 곧 그 경계입니다. 사이를
+     띄우면 선이 목록에서 떨어져 나와, 어디가 잘린 자리인지가 아니라 버튼 위에 그은
+     줄로 보입니다. 마지막 카드와의 거리는 목록이 안쪽 여백으로 냅니다. */
+  gap: 0;
+  /* 시트가 이미 위아래를 비워두었습니다. */
+  padding-block: 0;
+}
+
+.sheet[open] .schedule__list {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 목록이 잘리는 자리에서 카드 그림자가 잘려 보이지 않도록 좌우로 조금 넓혀
+     잡고, 같은 만큼 안쪽 여백으로 되돌립니다. */
+  margin-inline: calc(-1 * var(--spacing-100));
+  padding-inline: var(--spacing-100);
+  /* 시트 안에서는 간격이 한 단계씩 좁습니다. 본문 옆에 설 때는 왼쪽 단의 긴 글과
+     보조를 맞춰야 하지만, 여기서는 고르는 것만 있어 촘촘한 편이 한눈에 들어옵니다. */
+  gap: var(--spacing-400);
+  /* 다 내렸을 때 마지막 카드가 선에 닿지 않도록 목록 안쪽에 24 를 둡니다. 바깥에
+     두면 스크롤이 그 여백 위에서 끝나, 잘린 카드와 선 사이가 늘 벌어져 있습니다. */
+  padding-block-end: var(--spacing-600);
+}
+
+.sheet[open] .schedule__actions {
+  flex: none;
+  /* 버튼 위 12. 아래는 판의 여백이 같은 12 로 맡고 있어, 고정된 버튼 줄이 위아래로
+     같은 만큼 숨을 쉽니다. */
+  padding-block-start: var(--spacing-300);
+  /* 잘린 자리에 긋는 선은 이 줄의 위변입니다. 줄이 판의 좌우 여백 안에 있으면 선도
+     그만큼 짧아져, 화면을 가로지르는 경계가 아니라 버튼 위에 놓인 짧은 막대가
+     됩니다. 좌우로 여백만큼 넓혀 선을 화면 끝까지 긋고, 같은 만큼 안쪽 여백으로
+     되돌려 버튼은 제자리에 둡니다. */
+  margin-inline: calc(-1 * var(--_sheet-padding-inline));
+  padding-inline: var(--_sheet-padding-inline);
+}
+
+.sheet[open] .schedule__group,
+.sheet[open] .schedule__options { gap: var(--spacing-200); }
+
+/* 날짜도 한 단계 작습니다 — 시트에서는 카드가 주인공입니다. */
+.sheet[open] .schedule__date {
+  font-size: var(--typography-body-m-medium-font-size);
+  font-weight: var(--typography-body-m-medium-font-weight);
+  line-height: var(--typography-body-m-medium-line-height);
+}
+
+/* ---- 머리글 ------------------------------------------------------------
+   모달일 때만 나옵니다. 아래에서 올라오는 시트는 어디에서 왔는지가 방향으로
+   드러나고 손가락을 내리면 닫히지만, 화면 가운데 뜬 상자는 무엇인지와 어떻게
+   닫는지를 스스로 말해야 합니다.
+*/
+
+.sheet__head { display: none; }
+
+.sheet__head h2 {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--colors-fg);
+  font-size: var(--typography-body-l-medium-font-size);
+  font-weight: var(--typography-body-l-medium-font-weight);
+  line-height: var(--typography-body-l-medium-line-height);
+}
+
+/* ---- 961~ : --modal 은 가운데에 뜹니다 ---------------------------------
+   ⚠️ 모달 디자인이 나오기 전입니다. 시트가 이미 가진 것(폭·여백·최대 높이)을 그대로
+   쓰고, 붙는 자리와 모서리·그림자·나타나는 방향만 바꿨습니다. 디자인이 나오면
+   이 블록만 고치면 됩니다.
+*/
+
+@media (min-width: 961px) {
+  .sheet--modal { align-items: center; }
+
+  /* 머리글은 줄 전체를 씁니다 — 목록이 그 아래를 스크롤해도 제목과 닫기는 남습니다. */
+  .sheet--modal .sheet__head {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--spacing-300);
+    box-sizing: border-box;
+    block-size: var(--_sheet-modal-header-height);
+    /* 오른쪽이 좁은 것은 닫기 버튼이 제 좌우 여백 16 을 이미 품고 있기 때문입니다. */
+    padding: 0 var(--spacing-200) 0 var(--spacing-500);
+  }
+
+  .sheet--modal .sheet__head h2 {
+    font-size: var(--typography-heading-xs-semibold-font-size);
+    font-weight: var(--typography-heading-xs-semibold-font-weight);
+    line-height: var(--typography-heading-xs-semibold-line-height);
+  }
+
+  .sheet--modal .sheet__panel {
+    max-inline-size: var(--_sheet-modal-width);
+    /* 화면 높이에서 위아래 여백만 뺀 고정 높이입니다.
+       최대가 아니라 고정인 것은, 일정이 셋이든 열이든 상자 크기가 같아야 날짜를
+       오가는 동안 모달이 커졌다 작아졌다 하지 않기 때문입니다. 목록이 짧으면
+       아래가 비고, 버튼은 늘 같은 자리에 있습니다.
+       위아래 여백이 화면마다 같아야 하는 것도 같은 이유입니다 — 큰 화면에서만
+       여백이 벌어지면 같은 모달이 화면마다 다른 크기로 보입니다. */
+    block-size: calc(100dvh - 2 * var(--_sheet-modal-margin));
+    /* 바텀시트가 들고 있던 76dvh 상한을 풉니다. 그대로 두면 화면이 커져도 모달이
+       따라 커지지 않습니다. */
+    max-block-size: none;
+    /* 안쪽 여백은 머리글·목록·버튼이 각자 가집니다. 판이 통째로 물고 있으면
+       머리글이 줄 전체를 쓸 수 없습니다. */
+    padding: 0;
+    gap: 0;
+    /* 아래가 화면 끝에 닿지 않으므로 네 모서리를 모두 둥글립니다. */
+    border-radius: var(--_sheet-rounded);
+    box-shadow: var(--_sheet-modal-shadow);
+  }
+
+  /* 목록·배너·버튼은 같은 세로선에서 시작합니다. */
+  .sheet--modal[open] .schedule {
+    /* 판이 고정 높이라 남는 자리를 목록이 받아야 합니다. 그러지 않으면 내용만큼만
+       차지하고 버튼이 상자 한가운데에 뜹니다. */
+    flex: 1 1 auto;
+    gap: 0;
+    padding-block: 0;
+  }
+
+  .sheet--modal[open] .alert-banner {
+    margin: 0 var(--_sheet-modal-padding-inline) var(--spacing-400);
+  }
+
+  .sheet--modal[open] .schedule__list {
+    margin-inline: 0;
+    padding-inline: var(--_sheet-modal-padding-inline);
+  }
+
+  .sheet--modal[open] .schedule__actions {
+    /* 가운데 뜬 상자는 판이 좌우 여백을 갖지 않아 줄이 이미 상자 폭을 다 씁니다.
+       위에서 넓혀둔 만큼을 되돌리지 않으면 상자 밖으로 삐져나갑니다. */
+    margin-inline: 0;
+    padding: var(--spacing-300) var(--_sheet-modal-padding-inline);
+  }
+
+  /* 아래에서 올라오는 대신 그 자리에서 살짝 커지며 나타납니다. 가운데 뜬 상자가
+     아래에서 밀려 올라오면 어디에서 왔는지 알 수 없습니다. */
+  .sheet--modal .sheet__panel {
+    transition:
+      scale var(--_duration-base) var(--_easing-standard),
+      opacity var(--_duration-base) var(--_easing-standard);
+  }
+
+  .sheet--modal:not([open]) .sheet__panel {
+    translate: none;
+    scale: 0.98;
+  }
+
+  @starting-style {
+    .sheet--modal[open] .sheet__panel {
+      translate: none;
+      scale: 0.98;
+    }
+  }
+}
+
+/* ---- 잘린 자리를 알리는 선 --------------------------------------------
+   머리글과 버튼은 목록 위아래에 고정되어 있어, 목록이 그 밑으로 이어지는지 여기서
+   끝나는지가 보이지 않습니다. 남은 쪽에만 실선을 그어 그것을 대신합니다.
+
+   넘치지 않으면 둘 다 없고, 맨 위에서는 아래쪽만, 중간에서는 양쪽, 끝에서는
+   위쪽만 — 규칙은 하나입니다. "그 방향에 아직 내용이 있으면 긋는다".
+
+   inset 으로 그리는 것은 바깥 그림자가 카드 위에 겹쳐 번지기 때문입니다. 안쪽
+   선이면 정확히 경계에만 붙습니다.
+*/
+
+.sheet__head,
+.sheet .schedule__actions {
+  transition: box-shadow var(--_duration-fast) var(--_easing-standard);
+}
+
+.sheet__panel.is-above .sheet__head {
+  box-shadow: inset 0 -1px 0 var(--_sheet-scroll-line);
+}
+
+.sheet__panel.is-below .schedule__actions {
+  box-shadow: inset 0 1px 0 var(--_sheet-scroll-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet__head,
+  .sheet .schedule__actions { transition: none; }
+}
+
+/* ---- 961~ : --inline 은 시트가 아닙니다 --------------------------------
+   dialog 는 열려 있지 않으면 브라우저가 감춥니다. 그 규칙을 여기서 덮어, 감싼 것이
+   없었던 것처럼 만듭니다. */
+
+@media (min-width: 961px) {
+  .sheet--inline,
+  .sheet--inline .sheet__panel { display: contents; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet::backdrop,
+  .sheet__panel { transition: none; }
+
+  .sheet:not([open]) .sheet__panel { translate: none; }
+}

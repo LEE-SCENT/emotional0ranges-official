@@ -1,0 +1,574 @@
+/**
+ * ProductCard — 모임 카드.
+ *
+ *   <article class="product-card">
+ *     <div class="product-card__media">
+ *       <img src="…" alt="">
+ *       <div class="product-card__tags">
+ *         <span class="tag">8월 25일 (화) 저녁 7시</span>
+ *       </div>
+ *     </div>
+ *     <div class="product-card__info">
+ *       <h3 class="product-card__title">12:12 티키타카 로테이션 소개팅</h3>
+ *       <p class="product-card__desc">경기 성남시 외 4개 지역 · 일정 5개</p>
+ *       <p class="product-card__price"><b>할인가</b> 33,000원~</p>
+ *     </div>
+ *   </article>
+ *
+ * Figma 는 이미지를 398×275 로 고정하지만, 카드가 그리드 안에서 늘어나야 해
+ * 같은 비율(aspect-ratio)로 옮겼습니다.
+ */
+
+.product-card {
+  /* 제목의 링크가 카드 전체로 늘어날 기준점입니다. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  min-inline-size: 0;
+  font-family: var(--_font-family-base);
+}
+
+/* ---- 카드 전체가 링크 ----------------------------------------------------
+   카드를 통째로 <a> 로 감싸지 않고 제목만 링크로 두고, 그 링크를 카드 크기로
+   늘립니다.
+
+   통째로 감싸면 화면을 읽어주는 쪽에서 링크 이름이 "사진, 8월 22일 (토) 오후 2시,
+   돌싱 로테이션 소개팅, 서울 강남 외 4개 지역, 일정 5개, 42,000원~" 한 줄이 됩니다.
+   목록을 링크만 훑어 내려갈 때 그 전부를 듣게 됩니다. 제목만 링크면 이름이 제목
+   하나이고, 나머지는 그 옆의 설명으로 남습니다.
+
+   글자를 끌어 선택하는 것도 그대로입니다 — 카드 전체가 링크면 드래그가 링크 끌기가
+   됩니다.
+*/
+
+.product-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card__title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* 초점은 제목 글자가 아니라 카드에 그립니다 — 눌리는 자리가 카드 전체입니다. */
+.product-card__title a:focus-visible { outline: none; }
+
+.product-card:has(a:focus-visible) {
+  outline: 2px solid var(--colors-fg);
+  outline-offset: 4px;
+  border-radius: var(--_rounded-s);
+}
+
+.product-card__media {
+  position: relative;
+  overflow: clip;
+  aspect-ratio: var(--_product-card-image-ratio);
+  background: var(--colors-bg-low);
+}
+
+/* 이미지를 흐름에서 빼야 합니다. block-size:100% 로 두면 부모의 높이를 참조하는데
+   부모는 aspect-ratio 로 높이를 정하려 해서 순환이 생기고, 결국 이미지 원본 높이가
+   박스를 밀어냅니다 — 사진마다 카드 높이가 달라지던 원인입니다. */
+.product-card__media img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* 사진 위 tag 가 밝은 하늘·벽에서도 읽히도록 위쪽만 어둡게 깝니다. */
+.product-card__media::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: var(--_product-card-scrim-height);
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--_product-card-scrim-from), transparent);
+}
+
+/* 카드에 무엇이 실리고 그 값이 어느 일정에서 오는지는 policy.html 에 정리해
+   두었습니다. 아래 주석은 그중 CSS 로 강제되는 부분만 다시 적습니다. */
+
+/* ---- 잔여석 띠 (좁은 화면) ----------------------------------------------
+   960 이하에서는 잔여석·마감을 이미지 위 tag 대신 이미지 아래 띠로 보여줍니다.
+   상품 카드와 프로모션 카드가 같습니다.
+
+     <div class="product-card__media">
+       …
+       <p class="product-card__status">
+         <span class="is-remaining">남성 2자리 남음</span>
+         <span class="is-closed">여성 마감</span>
+       </p>
+     </div>
+
+   좁은 카드에서 tag 를 세 개까지 얹으면 사진이 거의 가려지고, 날짜가 길면 줄까지
+   바뀝니다. 띠로 내리면 폭에 상관없이 한 줄로 들어갑니다.
+
+   두 정보 모두 마크업에 두고 CSS 가 무엇을 보일지 고릅니다 — 폭에 따라 다른 DOM 을
+   쓰면 서버 렌더링에서 어느 쪽을 내보낼지 알 수 없습니다.
+*/
+
+.product-card__status {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-50);
+  margin: 0;
+  padding: var(--spacing-200);
+  background: var(--_product-card-status-bg);
+  backdrop-filter: blur(var(--_product-card-status-blur-radius));
+  font-size: var(--typography-body-s-medium-font-size);
+  font-weight: var(--typography-body-s-medium-font-weight);
+  line-height: var(--typography-body-s-medium-line-height);
+  letter-spacing: var(--typography-body-s-medium-letter-spacing);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 알릴 것이 없으면 띠도 없습니다. 자리가 넉넉한 모임에서는 아무 말도 하지 않는 것이
+   규칙이라(policy.html), 빈 띠만 남으면 사진 위에 얹힌 회색 자국이 됩니다. */
+.product-card__status:empty { display: none; }
+
+.product-card__status .is-remaining { color: var(--_product-card-status-fg-remaining); }
+.product-card__status .is-closed { color: var(--_product-card-status-fg-closed); }
+
+/* 가운뎃점은 뒤따르는 항목에 붙입니다 — 푸터와 같은 이유입니다. */
+.product-card__status > * + *::before {
+  content: '·';
+  padding-inline-end: var(--spacing-50);
+  color: var(--_product-card-status-fg-closed);
+}
+
+/* 좁은 화면에서 레일은 화면 끝까지 씁니다. 컨테이너 여백 안에 갇혀 있으면
+   스크롤 중인 카드가 화면 가장자리에서 20px 안쪽에 잘려 멈춘 것처럼 보입니다.
+   음수 바깥여백으로 여백을 지우고 같은 크기의 안쪽여백으로 되돌려, 첫 카드와
+   마지막 카드는 그대로 본문에 맞으면서 가운데 카드만 가장자리까지 흐릅니다. */
+@media (max-width: 960px) {
+  .product-card-group {
+    margin-inline: calc(-1 * var(--container-gutter-base));
+    padding-inline: var(--container-gutter-base);
+    scroll-padding-inline: var(--container-gutter-base);
+  }
+}
+
+@media (max-width: 960px) {
+  .product-card__status { display: flex; }
+
+  /* 같은 정보가 위아래로 두 번 나오지 않게 합니다. 날짜 tag 는 그대로 둡니다. */
+  .product-card__tags .tag--accent-pri,
+  .product-card__tags .tag--accent-sec { display: none; }
+}
+
+/* 태그 노출 조건은 policy.html 에 있습니다. 여기서 CSS 가 감당하는 건 하나입니다 —
+   최대 조합(전용 + 일정 + 성별 둘 = 4개)이 312px 카드의 이미지 폭을 넘으므로,
+   잘라내지 않고 다음 줄로 넘기려고 폭을 묶고 wrap 을 켭니다. */
+.product-card__tags {
+  position: absolute;
+  inset-block-start: var(--spacing-300);
+  inset-inline: var(--spacing-300);
+  z-index: 1;
+  display: flex;
+  /* 오른쪽 끝을 묶어두었으므로 넘치면 다음 줄로 내려갑니다. 한 줄로 두면
+     이미지의 overflow: clip 에 걸려 마지막 태그가 잘려 나갑니다. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+/* Figma 는 제목·설명을 Heading 이라는 한 겹으로 더 묶고, 그 안에서는 간격이 0
+   입니다. 4px 는 Heading 과 가격 사이에만 붙습니다. 마크업을 한 겹 더 두는 대신
+   간격을 0 으로 두고 가격에만 위 여백을 줍니다 — 결과가 같고 DOM 이 얕습니다. */
+.product-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-inline-size: 0;
+}
+
+
+.product-card__title,
+.product-card__desc,
+.product-card__price {
+  margin: 0;
+  font-feature-settings: 'lnum' 1;
+}
+
+/* 제목은 2줄까지만 보여주고 넘치면 … 로 자릅니다. 어드민에서 등록하는 값이라
+   길이를 통제할 수 없는데, 3줄이 되면 그 카드만 키가 커져 옆 카드와 가격 줄이
+   어긋납니다.
+
+   2줄분 높이를 미리 잡아두지는 않습니다. 그렇게 하면 1줄 제목 아래에 빈 줄이
+   남아 설명과의 간격이 벌어져 보입니다. 간격은 1줄 기준으로 두고, 제목이 실제로
+   2줄일 때만 그만큼 늘어납니다. */
+.product-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--colors-fg);
+  font-size: var(--typography-body-l-medium-font-size);
+  font-weight: var(--typography-body-l-medium-font-weight);
+  line-height: var(--typography-body-l-medium-line-height);
+}
+
+/* 메타(지역 · 일정)는 2줄까지 보여주고 넘치면 … 로 자릅니다. 한 줄로 자르면
+   "경기 성남시 외 4개 지역 · 일정 5개" 에서 뒤쪽 일정 수가 통째로 사라지는데, 앞의
+   지역만으로는 이 모임을 고를지 정할 수 없습니다 — 좁은 화면에서 카드가 188 까지
+   줄면 한 줄에 열 몇 글자라, 거의 늘 뒤가 잘립니다.
+
+   제목과 같은 2줄입니다. 3줄까지 열면 어드민에서 등록하는 값이라 길이를 통제할 수
+   없어, 그 카드만 키가 커져 옆 카드와 가격 줄이 어긋납니다.
+
+   2줄분 높이를 미리 잡아두지는 않습니다. 1줄짜리 아래에 빈 줄이 남으면 가격과의
+   간격이 벌어져 보입니다 — 제목과 같은 이유입니다. */
+.product-card__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--colors-fg-lower);
+  font-size: var(--typography-body-m-regular-font-size);
+  font-weight: var(--typography-body-m-regular-font-weight);
+  line-height: var(--typography-body-m-regular-line-height);
+}
+
+.product-card__price {
+  /* 제목·설명과 가격 사이의 4px. 공용 margin:0 리셋보다 뒤에 있어야 살아남습니다. */
+  margin-block-start: var(--spacing-100);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-150);
+  color: var(--colors-fg);
+  font-size: var(--typography-body-xl-semibold-font-size);
+  font-weight: var(--typography-body-xl-semibold-font-weight);
+  line-height: var(--typography-body-xl-semibold-line-height);
+  white-space: nowrap;
+}
+
+/* 할인 라벨. 가격보다 작고 브랜드 색입니다. */
+.product-card__price b {
+  color: var(--colors-fg-brand);
+  font-size: var(--typography-body-s-semibold-font-size);
+  font-weight: var(--typography-body-s-semibold-font-weight);
+  line-height: var(--typography-body-s-semibold-line-height);
+}
+
+/* ---- 카드 그룹 ---------------------------------------------------------
+   카드 사이는 2px 라 한 장의 레일처럼 보입니다. 그래서 모서리는 목록의 처음과
+   마지막 상품 바깥쪽에만 둡니다 (아래 참고).
+
+   grid 가 아니라 flex 인 이유는 마지막 "더보기" 때문입니다. grid 의 auto 열은
+   모두 같은 폭이라 더보기만 좁게 둘 수 없습니다.
+*/
+
+.product-card-group {
+  display: flex;
+  /* 디자인은 카드 사이를 2px 만 띄웁니다. 한 장의 레일처럼 보이게 하려는 간격이라
+     spacing-500 (20px) 로 벌려두면 카드가 따로 떨어져 보입니다. */
+  gap: var(--spacing-50);
+  align-items: start;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.product-card-group::-webkit-scrollbar { display: none; }
+
+.product-card-group > .product-card {
+  /* 넓은 화면에서는 세 장이 딱 맞게 들어가고 나머지는 넘칩니다. 좁아지면 1/3 이
+     minWidth 아래로 내려가는데, 그때는 세 장을 포기하고 312 를 지킵니다 — 카드가
+     그보다 좁아지면 태그 두 개가 이미지 밖으로 밀립니다.
+
+     전환점은 레일 폭 940 입니다: (940 - 4) / 3 = 312. */
+  flex: 0 0 max(var(--_product-card-min-width), (100% - 2 * var(--spacing-50)) / 3);
+  scroll-snap-align: start;
+}
+
+/* 목록의 처음과 마지막 상품만 바깥쪽 모서리를 둥글게 둡니다. DOM 순서에
+   고정되므로 스크롤해도 움직이지 않습니다 — 예전처럼 보이는 위치를 따라가게
+   하면 레일 한가운데에 둥근 모서리가 떠 보입니다.
+
+   :last-of-type 인 이유는 마지막 자식이 더보기 링크(<a>)이기 때문입니다. */
+.product-card-group > .product-card:first-of-type .product-card__media {
+  border-start-start-radius: var(--_product-card-rounded);
+  border-end-start-radius: var(--_product-card-rounded);
+}
+
+.product-card-group > .product-card:last-of-type .product-card__media {
+  border-start-end-radius: var(--_product-card-rounded);
+  border-end-end-radius: var(--_product-card-rounded);
+}
+
+/* ---- 더보기 -----------------------------------------------------------
+   목록 끝에 붙습니다.
+
+     <a class="product-card-more" href="#">
+       <span class="btn btn--blur btn--medium btn--icon-only">
+         <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+       </span>
+       <span>더보기</span>
+     </a>
+
+   화살표는 알약 모양 blur 버튼 안에 들어갑니다. 버튼 컴포넌트를 그대로 쓰므로
+   크기(패딩 8/16 · 아이콘 24)와 색은 button 토큰이 정합니다 — 여기서 다시
+   정하지 않습니다.
+
+   ⚠️ 링크 안이라 <button> 이 아니라 <span> 입니다. 누르는 자리는 더보기 전체이고
+   이 알약은 그 안의 그림입니다 — 버튼을 링크 안에 넣으면 누를 곳이 둘이 됩니다.
+
+   높이를 썸네일과 맞춰야 하는데, 그 높이는 카드 "폭"에서 나옵니다. block-size 의
+   100% 는 높이 기준으로 풀리므로 폭을 가리키는 컨테이너 쿼리 단위를 씁니다.
+*/
+
+.product-card-section { container-type: inline-size; }
+
+.product-card-more {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-250);
+  block-size: calc(
+    max(var(--_product-card-min-width), (100cqw - 2 * var(--spacing-50)) / 3)
+    / var(--_product-card-image-ratio)
+  );
+  /* Figma 의 minWidth 는 좌우 여백을 포함한 값입니다. border-box 로 두지 않으면
+     여백 32 가 그 위에 얹혀 140 이 됩니다. */
+  box-sizing: border-box;
+  min-inline-size: var(--_product-card-more-min-width);
+  padding-inline: var(--spacing-400);
+  color: var(--_product-card-more-fg);
+  text-decoration: none;
+  font-family: var(--_font-family-base);
+  font-size: var(--typography-body-m-regular-font-size);
+  font-weight: var(--typography-body-m-regular-font-weight);
+  line-height: var(--typography-body-m-regular-line-height);
+  letter-spacing: var(--typography-body-m-regular-letter-spacing);
+  white-space: nowrap;
+}
+
+
+
+/* ---- 잠금 (로그인 전) ------------------------------------------------------
+   사진은 그대로 두고 가격 자리에만 안내를 넣습니다.
+
+     <article class="product-card is-locked">
+       …
+       <p class="product-card__price">
+         <svg class="product-card__lock">…</svg>로그인 후 가격 확인
+       </p>
+
+   값이 아니라 안내라 값의 무게(20 semibold)를 벗습니다 — 14 regular 에 한 단
+   물러난 색입니다(Figma). 같은 자리에 그대로 두면 옆 카드의 실제 값과 같은
+   크기로 서서, 읽는 눈이 그것도 값으로 셉니다. */
+
+.product-card.is-locked .product-card__price {
+  gap: var(--spacing-100);
+  color: var(--_product-card-promotion-locked-fg);
+  font-size: var(--typography-body-m-regular-font-size);
+  font-weight: var(--typography-body-m-regular-font-weight);
+  line-height: var(--typography-body-m-regular-line-height);
+  letter-spacing: var(--typography-body-m-regular-letter-spacing);
+}
+
+/* 12(icon/2xs) 입니다 — 14 글자 옆에 서는 자물쇠라 가장 작은 단을 씁니다. */
+.product-card__lock {
+  flex: none;
+  inline-size: var(--icon-size-2xs);
+  block-size: var(--icon-size-2xs);
+  color: currentColor;
+}
+
+/* ---- category ----------------------------------------------------------
+   정사각 썸네일 + 제목 + 모임 수. 가격이 없습니다.
+
+     <article class="product-card product-card--category">
+       <div class="product-card__media"><img …></div>
+       <div class="product-card__info">
+         <h3 class="product-card__title">…</h3>
+         <p class="product-card__desc">모임 3개</p>
+       </div>
+     </article>
+
+   레일에 들어가는 상품 카드와 달리 낱장으로 놓이므로 네 모서리를 모두 둥글게
+   둡니다 — 상품 카드는 레일의 처음·마지막만 둥글다는 규칙이 있어 기본값에
+   반지름이 없습니다.
+*/
+
+.product-card--category .product-card__media {
+  aspect-ratio: var(--_product-card-category-image-ratio);
+  border-radius: var(--_product-card-rounded);
+}
+
+.product-card--category .product-card__media::after {
+  block-size: var(--_product-card-category-scrim-height);
+  background: linear-gradient(to bottom, var(--_product-card-category-scrim-from), transparent);
+}
+
+/* 카테고리 카드도 같은 레일에 담기지만 간격과 폭 규칙이 다릅니다. 상품 카드는
+   레일이 한 장처럼 보이도록 2px 로 붙이는 반면, 카테고리는 낱장으로 읽혀야 해서
+   12px 을 띄우고 모서리도 네 곳 모두 둥급니다.
+
+   폭은 화면에 따라 두 값 중 하나입니다 — 사이를 유동적으로 잇지 않는 건 디자인이
+   198 과 108 두 지점만 정해두었기 때문입니다. 어느 쪽이든 다 안 들어가면
+   레일이 가로로 스크롤됩니다. */
+.product-card-group--category {
+  gap: var(--_product-card-category-gap);
+}
+
+.product-card-group--category > .product-card {
+  flex: 0 0 var(--_product-card-category-min-width);
+}
+
+@media (min-width: 961px) {
+  .product-card-group--category > .product-card {
+    flex-basis: var(--_product-card-category-width);
+  }
+}
+
+/* 낱장으로 놓이므로 처음·마지막만 둥글게 두는 상품 카드 규칙을 되돌립니다. */
+.product-card-group--category > .product-card:first-of-type .product-card__media,
+.product-card-group--category > .product-card:last-of-type .product-card__media {
+  border-radius: var(--_product-card-rounded);
+}
+
+/* ---- promotion ---------------------------------------------------------
+   큰 사진 하나와 3×2 타일이 2px 간격으로 한 덩어리를 이룹니다.
+
+     <article class="product-card product-card--promotion">
+       <div class="product-card__media">
+         <div class="product-card__main"><img …></div>
+         <div class="product-card__tiles">
+           <div class="product-card__tile"><img …></div>
+           … 5장 …
+           <a class="product-card__tile product-card__tile--more"> 더보기 </a>
+         </div>
+         <div class="product-card__tags"> tag … </div>
+       </div>
+       <div class="product-card__info"> … </div>
+     </article>
+
+   더보기는 옵션입니다. 메인 썸네일을 포함해 사진이 7장 이상일 때만 마지막 타일에
+   얹습니다 — 타일 칸이 여섯이라 7장이 되어야 격자가 다 차기 때문입니다. 6장 이하면
+   더보기 없이 두고, 마지막 칸은 비워 둡니다(카드 배경색이 보입니다).
+
+   높이는 큰 사진의 비율 하나로 정해집니다. 타일 칸은 남는 높이를 반씩 나눠 갖고,
+   그 결과가 마침 정사각에 가깝습니다 (599×400 → 198×199). 타일에 따로 비율을
+   주면 두 값이 싸워서 어느 한쪽에 빈틈이 생깁니다.
+*/
+
+.product-card--promotion .product-card__media {
+  /* 높이는 아래 __main 이 정합니다. */
+  aspect-ratio: auto;
+  display: flex;
+  gap: var(--_product-card-promotion-gap);
+  border-radius: var(--_product-card-rounded);
+}
+
+.product-card__main {
+  position: relative;
+  flex: 1 0 0;
+  min-inline-size: 0;
+  aspect-ratio: var(--_product-card-promotion-main-ratio);
+}
+
+.product-card__tiles {
+  flex: 1 0 0;
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--_product-card-promotion-columns), minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: var(--_product-card-promotion-gap);
+}
+
+.product-card__tile { position: relative; }
+
+.product-card__main img,
+.product-card__tile img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* 사진마다 한 겹 어둡게 깝니다. 밝기가 제각각인 사진 일곱 장이 붙어 있어
+   그대로 두면 한 덩어리로 읽히지 않습니다. */
+.product-card__main::after,
+.product-card__tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--_product-card-promotion-tint);
+  pointer-events: none;
+}
+
+/* 위쪽 그늘은 tag 가 얹히는 메인 썸네일에만 겁니다. 덩어리 전체에 걸면 오른쪽
+   타일 윗줄까지 같이 어두워집니다.
+
+   가리개(tint)와 그늘을 한 겹에 겹쳐 담습니다. ::before 로 나누면 그늘이 사진
+   아래로 깔립니다 — 사진이 position:absolute 라 정적인 ::before 보다 위에 그려집니다. */
+.product-card__main::after {
+  background-image: linear-gradient(
+    to bottom,
+    var(--_product-card-promotion-scrim-from),
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-size: 100% var(--_product-card-promotion-scrim-height);
+}
+
+/* 상품 카드의 스크림은 promotion 에서 쓰지 않습니다. */
+.product-card--promotion .product-card__media::after { content: none; }
+
+/* small 에서는 큰 사진 하나만 보여주고 타일 격자는 접습니다. 폭이 좁아지면
+   타일 한 칸이 60px 아래로 내려가 무엇이 찍혔는지 알아볼 수 없습니다.
+   __main 이 flex: 1 0 0 이라 타일이 사라지면 자동으로 폭을 다 씁니다. */
+@media (max-width: 960px) {
+  .product-card__tiles { display: none; }
+}
+
+.product-card__tile--more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* 타일의 어둠(::after) 위로 올려야 글자가 묻히지 않습니다. */
+.product-card__more-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-200);
+  padding: var(--spacing-500);
+  color: var(--_product-card-promotion-more-fg);
+  text-align: center;
+  font-size: var(--typography-body-l-medium-font-size);
+  font-weight: var(--typography-body-l-medium-font-weight);
+  line-height: var(--typography-body-l-medium-line-height);
+}
+
+.product-card__more-label svg {
+  display: block;
+  inline-size: var(--_product-card-promotion-more-icon-size);
+  block-size: var(--_product-card-promotion-more-icon-size);
+  /* arrowBack 을 뒤집어 오른쪽 화살표로 씁니다. */
+  scale: -1 1;
+}

@@ -1,0 +1,582 @@
+<!doctype html>
+<!-- 기본 프로필 — 마이 > 기본 프로필.
+     왼쪽에서 고치면 오른쪽 카드가 그 자리에서 따라 바뀝니다(profile.js).
+     좁은 화면에서는 카드가 "프로필 미리보기" 창으로 들어갑니다. -->
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>기본 프로필 — 감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 프로필 카드의 한마디에만 쓰는 명조입니다. 조각으로 나뉘어 있어 쓰인 글자만 받습니다. -->
+<link rel="stylesheet" href="./fonts/nanum-myeongjo/nanum-myeongjo.css?v=481777f6">
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/tag.css?v=fef5c195">
+<link rel="stylesheet" href="./components/checkbox.css?v=44baaa09">
+<link rel="stylesheet" href="./components/field.css?v=30705fc7">
+<link rel="stylesheet" href="./components/choice.css?v=14663585">
+<link rel="stylesheet" href="./components/verified-banner.css?v=34c301e8">
+<link rel="stylesheet" href="./components/profile-card.css?v=351d3a47">
+<link rel="stylesheet" href="./components/profile.css?v=4e1f19b6">
+<link rel="stylesheet" href="./components/tabs.css?v=a962487a">
+<link rel="stylesheet" href="./components/verify.css?v=9ecc570b">
+<link rel="stylesheet" href="./components/confirm.css?v=6a6a0bdf">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/bottom-cta.css?v=4d73a6db">
+<link rel="stylesheet" href="./components/top-bar.css?v=7633d627">
+<style>
+  body {
+    margin: 0;
+    background: var(--colors-bg);
+    color: var(--colors-fg);
+    font-family: var(--_font-family-base);
+  }
+  /* 화면에는 안 보이지만 스크린리더는 읽는 텍스트 */
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<!-- 다른 화면과 같은 GNB 입니다. 좁은 화면에서는 아래 topBar 가 대신합니다(top-bar.css). -->
+<header class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <a class="btn btn--ghost btn--medium" href="./meetups.html"><span class="btn__label">모임</span></a>
+        <a class="btn btn--ghost btn--medium" href="./matching.html"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <!-- 로그인하지 않았을 때만 남습니다. 로그인한 사람에게는 아래 목록이
+             누구인지 말하고 있어 my-menu.js 가 이 버튼을 지웁니다. -->
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <!-- 내 메뉴. GNB 가운데 줄의 메뉴가 서비스를 둘러보는 길이라면, 여기는
+             내 프로필·결제·설정처럼 나에게만 해당하는 것들이 섭니다(my-menu.js). -->
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 좁은 화면에서 GNB 를 대신합니다. 왼쪽은 나가는 길, 오른쪽은 지금 고친 것이
+     상대에게 어떻게 보이는지 — 넓은 화면에서 옆 단의 카드가 하는 일입니다. -->
+<header class="top-bar top-bar--page">
+  <a class="btn btn--ghost btn--medium btn--icon-only" data-back data-profile-leave="back" href="./my.html" aria-label="뒤로">
+    <svg class="btn__icon" aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+  </a>
+  <button class="btn btn--outlined btn--medium" type="button" data-profile-preview-open>
+    <span class="btn__label">프로필 미리보기</span>
+  </button>
+</header>
+
+<main class="container profile has-bottom-cta">
+  <header class="profile__header">
+    <a class="btn btn--blur btn--medium btn--icon-only" data-back data-profile-leave="back" href="./my.html" aria-label="뒤로">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+    </a>
+    <div class="profile__title">
+      <h1>기본 프로필</h1>
+      <!-- 운영 사이트의 문구 그대로입니다. -->
+      <p>매칭과 모임 추천에 쓰이는 정보예요. 솔직하게 채울수록 더 잘 맞는 사람을 만나요. 신뢰할 수 있는 모임을 위해 정확한 정보만 입력해 주세요. (허위 정보 기재 시 법적 책임)</p>
+    </div>
+  </header>
+
+  <div class="profile__body">
+    <form class="profile__form" data-profile-form novalidate>
+      <!-- 직장 인증을 권하는 추천 카드. 인증 전에만 섭니다(profile.js). 운영 사이트의 안내를
+           세 가지(비공개 · 중복 확인 용도 · 공개는 직접 선택)로 줄였습니다 — "약 20초면 완료"는
+           버튼이 말합니다. 바탕은 인증 띠(VerifiedBanner)와 같은 따뜻한 중립색입니다. -->
+      <div class="profile-assure" data-company="none" hidden>
+        <p class="profile-assure__text">
+          <b>안심하세요! 직장 정보는 기본 비공개예요</b>
+          <span>상대에게 바로 공개되지 않고, 같은 직장 사람과 마주치지 않도록 중복 확인에만 쓰여요.</span>
+          <span>직접 공개를 선택한 경우에만 프로필에 보여요.</span>
+        </p>
+        <!-- 아래 직장 인증 자리로 내려가지 않고 곧장 인증 창을 엽니다(건강보험 탭부터). -->
+        <button class="btn btn--filled btn--medium" type="button" data-verify-open="company">
+          <span class="btn__label">20초 만에 직장 인증하기</span>
+        </button>
+      </div>
+
+
+      <!-- 하는 일. 운영 사이트와 같이 직업과 직장 인증이 먼저 섭니다. -->
+      <div class="profile__section">
+        <div class="field" role="group" aria-labelledby="profile-job-label" data-field="job">
+          <span class="field__label" id="profile-job-label">직업<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></span>
+          <div class="profile__occupation">
+            <div class="segmented segmented--default" role="tablist" aria-label="직업을 찾는 방법" data-job-modes>
+              <span class="segmented__thumb" aria-hidden="true"></span>
+              <button class="segmented__item is-selected" type="button" role="tab" aria-selected="true" data-job-mode="search">검색</button>
+              <button class="segmented__item" type="button" role="tab" aria-selected="false" data-job-mode="category">카테고리</button>
+            </div>
+            <div class="text-field" data-job-search>
+              <svg class="text-field__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+              <!-- type="search" 가 아닙니다. 그쪽은 브라우저가 제 지우기(파란 ×)를 그려 넣습니다. -->
+              <input type="text" name="job-search" placeholder="직업 검색" aria-label="직업 검색" autocomplete="off"
+                     role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="job-suggest">
+              <button class="text-field__clear" type="button" data-job-clear aria-label="검색어 지우기" hidden>
+                <svg aria-hidden="true"><use href="#icon-cancelCircleFilled"></use></svg>
+              </button>
+              <!-- 치는 대로 맞는 직업이 아래에 뜹니다(profile.js). -->
+              <ul class="text-field__suggest" id="job-suggest" role="listbox" aria-label="직업" hidden></ul>
+            </div>
+            <div class="field-row" data-job-category hidden>
+              <!-- 상자마다 제 칸(.field)에 들어 있습니다. 빠졌다는 말이 그 상자 바로 아래에
+                   서야 해서입니다 — 중분류가 빠졌는데 말이 줄 전체의 왼쪽 끝에 서면 어느
+                   상자를 두고 하는 말인지 찾아야 합니다. -->
+              <div class="field">
+                <div class="text-field text-field--select">
+                  <select name="job-major" aria-label="직업 대분류"></select>
+                  <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+                </div>
+              </div>
+              <div class="field" data-field="job-minor">
+                <div class="text-field text-field--select">
+                  <select name="job-minor" aria-label="직업 중분류"></select>
+                  <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 운영 사이트의 안내입니다. 명단과 카드에 이 직업이 어떻게 적히는지(profile.js). -->
+          <p class="field__help" data-job-display hidden></p>
+        </div>
+
+        <!-- 회사는 인증으로 들어오는 값이라, 인증 전과 후가 다른 모습입니다(profile.js 가
+             profile.verified.company 로 고릅니다). 둘을 칸 하나에서 바꿔 끼우지 않는 것은
+             인증 전에는 칸에 넣을 값 자체가 없기 때문입니다. -->
+        <div class="profile__group" data-company="done">
+          <div class="field">
+            <label class="field__label" for="profile-company">회사</label>
+            <div class="profile__with-check">
+              <!-- 회사 인증으로 확인된 이름이라 고칠 수 없습니다. 바꾸려면 재인증입니다. -->
+              <div class="text-field text-field--readonly">
+                <input id="profile-company" type="text" name="company" readonly>
+              </div>
+              <label class="checkbox-label">
+                <span class="checkbox">
+                  <input type="checkbox" name="company-public">
+                  <span class="checkbox__box" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span>
+                </span>
+                프로필에 정보 공개
+              </label>
+            </div>
+            <p class="field__help">같은 회사 사람이 참여한 모임인지 확인할 수 있어요</p>
+          </div>
+
+          <div class="verified-banner verified-banner--done">
+            <div class="verified-banner__box">
+              <svg class="verified-banner__icon" aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>
+              <p class="verified-banner__text"><b>회사 인증 완료</b></p>
+            </div>
+            <button class="btn btn--blur btn--medium" type="button" data-verify-open="company"><span class="btn__label">재인증</span></button>
+          </div>
+        </div>
+
+        <!-- 인증 전에는 이 자리에 아무것도 서지 않습니다. 권하는 것은 폼 첫머리의 추천 카드
+             하나가 맡습니다 — 같은 창을 여는 버튼이 두 곳에 다른 글자로 서면 둘이 다른 것인지
+             묻게 됩니다. 인증하면 위의 "회사 인증 완료" 띠가 이 자리에 섭니다. -->
+      </div>
+
+      <hr class="profile__divider">
+
+      <!-- 본인인증으로 들어온 것들. 보여주기만 하고 고칠 수 없습니다. 운영 사이트와 같이
+           안내가 먼저, 그다음 성별 · 출생연도 차례입니다. -->
+      <div class="profile__section">
+        <!-- 운영 사이트와 같이 이름 칸은 없고 안내 한 줄이 섭니다. "본인인증을 다시"는 본인확인
+             기관의 창을 띄웁니다(identity-check.js). -->
+        <p class="profile__note">이름 · 성별 · 출생연도는 휴대폰 본인인증으로 등록돼 여기서 바꿀 수 없어요.
+          바꾸시려면 <button class="profile__link" type="button" data-identity-check>본인인증을 다시</button> 해 주세요.
+          개명은 고객센터로 문의해 주세요.</p>
+
+        <!-- 성별은 출생연도와 같이 읽기 전용 칸입니다(profile.js 가 값을 넣습니다). 고를 수 없는 값을
+             남성·여성 두 선택지로 보이면 고를 수 있는 것처럼 읽힙니다. 이름이 없는 칸이라 폼의
+             값에 들지 않습니다. 바꿀 수 없다는 말은 위의 안내 한 줄이 이미 합니다.
+             이름 · 성별 · 출생연도는 같은 출처(본인인증)의 값이라 한 묶음으로 섭니다. 이름이 한 줄을
+             다 쓰고 그 아래 성별 · 출생연도가 반씩입니다(profile.css 의 .profile__me). -->
+        <div class="profile__me">
+          <div class="field profile__me-name">
+            <label class="field__label" for="profile-name">이름</label>
+            <div class="text-field text-field--readonly">
+              <input id="profile-name" type="text" readonly data-me-name>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="profile-gender">성별</label>
+            <div class="text-field text-field--readonly">
+              <input id="profile-gender" type="text" readonly data-me-gender>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="profile-birth">출생연도</label>
+            <div class="text-field text-field--readonly">
+              <input id="profile-birth" type="text" readonly data-me-birth>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="profile__divider">
+
+      <!-- 사는 곳 · 일하는 곳 · 키 (운영 사이트의 차례) -->
+      <div class="profile__section">
+        <!-- 여기서부터가 스스로 채우는 칸입니다. 전부 채워야 저장되어 이름표마다 점이 붙습니다.
+             위의 이름·출생연도·성별과 아래의 회사는 인증으로 들어온 값이라 채울 것이 없어
+             점이 없습니다. 답에 딸려 나오는 칸(기간, 자녀 수·양육)에도 없습니다 — 위의
+             물음이 이미 필수라 그 답의 일부로 읽힙니다. 채워야 하는 것은 같습니다. -->
+        <div class="field" role="group" aria-labelledby="profile-home-label">
+          <span class="field__label" id="profile-home-label">거주 지역<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></span>
+          <div class="field-row">
+            <div class="field">
+              <div class="text-field text-field--select">
+                <select name="home-sido" aria-label="거주 지역 시·도"></select>
+                <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+              </div>
+            </div>
+            <div class="field" data-field="home-gugun">
+              <div class="text-field text-field--select">
+                <select name="home-gugun" aria-label="거주 지역 시·군·구"></select>
+                <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+              </div>
+            </div>
+          </div>
+          <p class="field__help">구 단위까지 선택해 주세요</p>
+        </div>
+
+        <div class="field" role="group" aria-labelledby="profile-work-label">
+          <span class="field__label" id="profile-work-label">근무 지역<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></span>
+          <!-- 운영 사이트는 [지역 선택 · 고정 근무지 없음] 전환이지만, 여기서는 체크박스로 둡니다.
+               대부분은 지역을 고르는 사람이라 고르는 칸이 바로 보여야 하고, 고정 근무지 없음은
+               그 칸을 끄는 예외입니다 — 두 길을 같은 무게로 세울 일이 아닙니다. -->
+          <div class="profile__workplace">
+            <div class="field-row">
+              <div class="field">
+                <div class="text-field text-field--select">
+                  <select name="work-sido" aria-label="근무 지역 시·도"></select>
+                  <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+                </div>
+              </div>
+              <div class="field" data-field="work-gugun">
+                <div class="text-field text-field--select">
+                  <select name="work-gugun" aria-label="근무 지역 시·군·구"></select>
+                  <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+                </div>
+              </div>
+            </div>
+            <p class="field__help">회사원은 직장 위치, 사업자는 사업장 위치, 프리랜서는 주 활동 지역 — 구 단위까지</p>
+            <label class="checkbox-label">
+              <span class="checkbox">
+                <input type="checkbox" name="work-none">
+                <span class="checkbox__box" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span>
+              </span>
+              고정 근무지 없음
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="profile-height">키<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></label>
+          <div class="profile__height">
+            <div class="profile__stepper">
+              <button class="btn btn--outlined btn--small btn--icon-only" type="button" data-height-step="-1" aria-label="1cm 줄이기">
+                <svg class="btn__icon" aria-hidden="true"><use href="#icon-minus"></use></svg>
+              </button>
+              <output for="profile-height" data-height-text>175cm</output>
+              <button class="btn btn--outlined btn--small btn--icon-only" type="button" data-height-step="1" aria-label="1cm 늘리기">
+                <svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+              </button>
+            </div>
+            <input class="profile__slider" id="profile-height" name="height" type="range" step="1" value="175">
+          </div>
+        </div>
+      </div>
+
+      <hr class="profile__divider">
+
+      <!-- 혼인·가족 -->
+      <div class="profile__section">
+        <div class="field" role="group" aria-labelledby="profile-married-label" data-field="married">
+          <span class="field__label" id="profile-married-label">혼인 경험<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></span>
+          <!-- 혼인신고(법률혼)는 없음·있음 가운데 하나이고, 사실혼은 그와 따로 켜고
+               끕니다 — 둘 다 겪은 사람도, 사실혼만 겪은 사람도 있습니다. -->
+          <div class="choice-group">
+            <!-- 글자는 운영 사이트 그대로이고, 차례는 다릅니다(운영: 미혼 → 사실혼 → 혼인신고).
+                 하나만 고르는 두 카드를 붙여 두고, 따로 켜는 사실혼은 그 오른쪽에 둡니다 —
+                 사이에 끼면 두 카드가 한 묶음으로 읽히지 않습니다. -->
+            <label class="choice"><input type="radio" name="married" value="none"><span>미혼</span></label>
+            <label class="choice"><input type="radio" name="married" value="yes"><span>혼인신고 경험 있음</span></label>
+            <label class="checkbox-label">
+              <span class="checkbox">
+                <input type="checkbox" name="cohabited">
+                <span class="checkbox__box" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span>
+              </span>
+              사실혼 경험 있음
+            </label>
+          </div>
+          <div class="field-row profile__periods" data-periods hidden>
+            <div class="field" data-period="married" hidden>
+              <span class="field__label field__label--sub" id="profile-married-period">법률혼 기간</span>
+              <div class="text-field text-field--period" role="group" aria-labelledby="profile-married-period">
+                <svg class="text-field__icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <label class="text-field__month">
+                  <span data-month-text>시작 월</span>
+                  <input type="month" name="married-from" aria-label="시작">
+                </label>
+                <span aria-hidden="true">~</span>
+                <label class="text-field__month">
+                  <span data-month-text>종료 월</span>
+                  <input type="month" name="married-to" aria-label="끝">
+                </label>
+              </div>
+            </div>
+            <div class="field" data-period="cohabited" hidden>
+              <span class="field__label field__label--sub" id="profile-cohabited-period">사실혼 기간</span>
+              <div class="text-field text-field--period" role="group" aria-labelledby="profile-cohabited-period">
+                <svg class="text-field__icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <label class="text-field__month">
+                  <span data-month-text>시작 월</span>
+                  <input type="month" name="cohabited-from" aria-label="시작">
+                </label>
+                <span aria-hidden="true">~</span>
+                <label class="text-field__month">
+                  <span data-month-text>종료 월</span>
+                  <input type="month" name="cohabited-to" aria-label="끝">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" role="group" aria-labelledby="profile-kids-label" data-field="kids">
+          <span class="field__label" id="profile-kids-label">자녀<span class="field__required" aria-hidden="true"></span><span class="sr-only">필수</span></span>
+          <div class="choice-group">
+            <label class="choice"><input type="radio" name="kids" value="none"><span>없음</span></label>
+            <label class="choice"><input type="radio" name="kids" value="yes"><span>있음</span></label>
+          </div>
+        </div>
+
+        <div class="field" role="group" aria-labelledby="profile-kids-detail-label" data-kids-detail hidden>
+          <span class="field__label" id="profile-kids-detail-label">자녀 수 · 양육</span>
+          <div class="choice-group choice-group--scroll" role="radiogroup" aria-label="자녀 수">
+            <label class="choice"><input type="radio" name="kids-count" value="1명"><span>1명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="2명"><span>2명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="3명"><span>3명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="4명"><span>4명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="5명"><span>5명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="6명"><span>6명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="7명"><span>7명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="8명"><span>8명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="9명"><span>9명</span></label>
+            <label class="choice"><input type="radio" name="kids-count" value="10명"><span>10명</span></label>
+          </div>
+          <div class="choice-group" role="radiogroup" aria-label="양육">
+            <label class="choice"><input type="radio" name="kids-custody" value="직접 양육"><span>직접 양육</span></label>
+            <label class="choice"><input type="radio" name="kids-custody" value="비양육"><span>비양육</span></label>
+            <label class="choice"><input type="radio" name="kids-custody" value="공동 양육"><span>공동 양육</span></label>
+          </div>
+        </div>
+
+        <!-- 혼인과 자녀를 함께 확인하는 인증이라 둘을 다 답한 뒤에 섭니다. 회사 인증이 회사
+             칸 아래에 서는 것과 같습니다(Figma 는 혼인 경험과 자녀 사이에 두었습니다). -->
+        <div class="verified-banner">
+          <svg class="verified-banner__icon" aria-hidden="true"><use href="#icon-infoCircle"></use></svg>
+          <p class="verified-banner__text">
+            <b>혼인·가족 정보 인증</b>
+            <span>서류로 혼인·가족 정보를 인증할 수 있어요</span>
+          </p>
+          <button class="btn btn--outlined btn--medium" type="button" data-verify-open="family"><span class="btn__label">인증하기</span></button>
+        </div>
+      </div>
+
+      <!-- 상세 프로필 완성도 카드는 폼의 끝, 저장 바로 위에 섭니다(넓은 화면 · 좁은 화면 같은 자리).
+           기본 프로필은 다 채워야 저장되는 화면이라, 상세 프로필은 그다음 걸음으로 끝에서
+           권합니다 — 첫머리에 두면 직장 인증 카드와 겹쳐 칸들이 한참 아래로 밀립니다(운영
+           사이트는 첫머리). 옆 단에는 프로필 카드만 섭니다. 위의 혼인·가족 인증 띠와 붙어
+           보이지 않게 선으로 구획을 나눕니다. -->
+      <hr class="profile__divider" data-profile-promo>
+      <div class="profile-promo" data-profile-promo>
+        <p class="profile-promo__text">
+          <b data-promo-title>나를 더 보여주는 프로필을 작성해 보세요</b>
+          <span data-promo-desc>상세 프로필을 작성하면 서로를 알아가는 데 도움이 돼요</span>
+        </p>
+        <a class="btn btn--filled btn--small" href="./profile-detail.html" data-profile-leave="detail">
+          <span class="btn__label" data-promo-cta>상세 프로필 채우기</span>
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+        </a>
+      </div>
+
+      <!-- 넓은 화면의 저장. 읽어 내려가는 동안 화면 아래에 붙어 따라오다가, 폼의 끝에 닿으면
+           제자리에 섭니다(profile.css). 좁은 화면에서는 아래의 bottom-cta 가 대신합니다. -->
+      <div class="profile__actions">
+        <button class="btn btn--filled btn--large profile__save" type="submit" data-profile-save disabled>
+          <span class="btn__label">저장</span>
+        </button>
+      </div>
+
+    </form>
+
+    <aside class="profile__aside" aria-label="프로필 카드 미리보기">
+      <article class="profile-card" data-profile-card></article>
+    </aside>
+  </div>
+</main>
+
+<!-- 좁은 화면의 저장. 어디까지 내려갔든 손가락이 닿는 자리에 있습니다. -->
+<div class="bottom-cta">
+  <button class="btn btn--filled btn--large" type="button" data-profile-save disabled>
+    <span class="btn__label">저장</span>
+  </button>
+</div>
+
+<!-- 고친 것이 남은 채 나가려 할 때(뒤로 · 상세 프로필로) -->
+<dialog class="confirm confirm--sheet" id="profile-leave" aria-labelledby="profile-leave-title">
+  <div class="confirm__panel">
+    <!-- 버튼은 둘입니다 — 떠나는 두 길(저장하지 않고 · 저장하고). 떠나지 않는 길은 버튼이
+         아니라 닫기입니다: 오른쪽 위의 ×, 창 바깥, Esc. 셋을 한 줄에 세우면 무엇이 이 창의
+         답이고 무엇이 물러나는 것인지가 섞입니다. -->
+    <button class="btn btn--ghost btn--medium btn--icon-only confirm__close" type="button" data-confirm-close aria-label="닫고 계속 작성">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+    <div class="confirm__text">
+      <h2 id="profile-leave-title">저장하지 않은 변경사항이 있어요<br>저장하고 나갈까요?</h2>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-profile-discard><span class="btn__label">저장 안 함</span></button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept><span class="btn__label">저장하고 나가기</span></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="confirm confirm--sheet" id="profile-move" aria-labelledby="profile-move-title">
+  <div class="confirm__panel">
+    <!-- 버튼은 둘입니다 — 떠나는 두 길(저장하지 않고 · 저장하고). 떠나지 않는 길은 버튼이
+         아니라 닫기입니다: 오른쪽 위의 ×, 창 바깥, Esc. 셋을 한 줄에 세우면 무엇이 이 창의
+         답이고 무엇이 물러나는 것인지가 섞입니다. -->
+    <button class="btn btn--ghost btn--medium btn--icon-only confirm__close" type="button" data-confirm-close aria-label="닫고 계속 작성">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+    <div class="confirm__text">
+      <h2 id="profile-move-title">변경사항을 저장하고<br>상세 프로필로 이동할까요?</h2>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-profile-discard><span class="btn__label">저장 안 함</span></button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept><span class="btn__label">저장하고 이동</span></button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 저장 알림이 사라진 뒤 한 번만 뜹니다. 상세 프로필을 아직 쓰지 않은 사람에게만. -->
+<dialog class="confirm confirm--sheet" id="profile-promo" aria-labelledby="profile-promo-title">
+  <div class="confirm__panel">
+    <div class="confirm__text">
+      <h2 id="profile-promo-title">프로필을 조금 더 완성해 보세요</h2>
+        <p>상세 프로필을 작성하면 서로를 알아가는 데 도움이 돼요.</p>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-confirm-close><span class="btn__label">나중에</span></button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept><span class="btn__label">상세 프로필 작성하기</span></button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 좁은 화면의 프로필 미리보기. 카드는 옆 단의 것과 같은 것을 그립니다. -->
+<dialog class="profile-preview" id="profile-preview" aria-label="프로필 미리보기">
+  <div class="profile-preview__track">
+    <article class="profile-card" data-profile-card></article>
+  </div>
+  <button class="btn btn--blur btn--medium btn--icon-only is-on" type="button" data-profile-preview-close aria-label="닫기">
+    <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+  </button>
+</dialog>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  const { initConfirms } = await import('./components/confirm.js?v=f516d2db')
+  initConfirms()
+  // segmented 보다 먼저 돕니다. 저장된 쪽(검색·카테고리)을 고른 칸으로 세워둬야
+  // 그쪽이 그 칸의 자리를 잽니다.
+  const { initProfile } = await import('./components/profile.js?v=ed4a2945')
+  initProfile()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initVerify } = await import('./components/verify.js?v=464fd775')
+  initVerify()
+  const { initIdentityCheck } = await import('./components/identity-check.js?v=21a9cf52')
+  initIdentityCheck()
+  // 고르는 칸(셀렉트·달·날짜)은 고르고 나면 초점을 내려놓습니다.
+  const { initFields } = await import('./components/field.js?v=de1ad19d')
+  initFields()
+  // 고친 것이 남아 있으면 profile-form.js 가 먼저 받아 한 번 묻습니다.
+  const { initBack } = await import('./components/back.js?v=c6d259cc')
+  initBack()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>

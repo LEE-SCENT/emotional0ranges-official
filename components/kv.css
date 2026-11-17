@@ -1,0 +1,362 @@
+/**
+ * KV — 홈 최상단 키비주얼. 배경 영상 위에 흰 텍스트와 CTA 가 올라갑니다.
+ *
+ * 폭은 .container 규칙을 그대로 따릅니다 (~960 여백 20 / 961~ 여백 24 · 최대 1200 / 1601~ 최대 1440).
+ * Figma 의 KV 폭(400·920·976·1200·1440)이 .container 계산과 정확히 일치해 따로 잡지 않습니다.
+ *
+ * 레이아웃이 티어마다 갈립니다.
+ *   ~960   : 세로. 콘텐츠가 아래에 붙고 오른쪽 아래에 페이지네이션.
+ *   961~   : 가로. 좌우 화살표 버튼 사이에 콘텐츠가 가운데 정렬.
+ */
+
+.kv {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: clip;
+  min-block-size: var(--_kv-min-height-base);
+  border-radius: var(--_kv-rounded-base);
+  color: var(--colors-fg-contrast);
+  font-family: var(--_font-family-base);
+}
+
+/* ---- 배경 영상 ---------------------------------------------------------
+   16:9 영상을 임의 비율의 박스에 꽉 채웁니다. 컨테이너 쿼리 단위를 쓰면
+   가로/세로 어느 쪽이 모자라든 넘치는 쪽으로 키워 잘라낼 수 있습니다.
+   iframe 은 object-fit 이 통하지 않아 이 방법이 필요합니다.
+*/
+.kv__media {
+  position: absolute;
+  inset: 0;
+  container-type: size;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--_colors-serious-gray-900);
+  /* 재생이 시작되기 전 YouTube 가 잠깐 띄우는 오버레이(일시정지 아이콘 등)를 가립니다.
+     controls=0 으로는 지워지지 않아, 실제로 재생될 때까지 덮어두는 편이 확실합니다.
+     그동안은 위 배경색이 보입니다. */
+  opacity: 0;
+  transition: opacity var(--_duration-base) var(--_easing-standard);
+}
+
+.kv.is-playing .kv__media { opacity: 1; }
+
+.kv__media > * {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+  border: 0;
+  /* cover 에 더해 한 번 더 키웁니다. YouTube 는 채널명(좌상단)과 로고(우하단)를
+     플레이어 가장자리에 붙여 그리므로, 딱 맞게 채우면 그 브랜딩이 그대로 보입니다.
+     넉넉히 키워 화면 밖으로 밀어냅니다. */
+  inline-size: calc(max(100cqw, 100cqh * 16 / 9) * var(--kv-media-overscale, 1.6));
+  block-size: calc(max(100cqh, 100cqw * 9 / 16) * var(--kv-media-overscale, 1.6));
+}
+
+/* 영상 위 흰 텍스트를 읽히게 하는 어둠. ⚠️ Figma 에 없지만 없으면 대비가 무너집니다. */
+.kv__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.72) 0%,
+    rgb(0 0 0 / 0.36) 45%,
+    rgb(0 0 0 / 0.24) 100%
+  );
+}
+
+/* ---- 콘텐츠 ----------------------------------------------------------- */
+
+.kv__content {
+  position: relative;
+  box-sizing: border-box;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-600);
+  inline-size: 100%;
+  /* 좁은 화면은 사방 32 입니다. 961 부터는 아래에서 좌우 40 만 남깁니다. */
+  padding: var(--spacing-800);
+  /* 사진 한가운데에 섭니다. `.kv` 는 아래로 몰아두는데(justify-content: flex-end)
+     그 아래 쪽수는 구석에 남아야 하므로, 줄 전체를 가운데로 옮기는 대신 이 덩어리만
+     남는 자리를 위아래로 나눠 갖습니다. */
+  margin-block: auto;
+}
+
+/* 문구는 어느 폭에서든 가운데 정렬입니다. 달라지는 것은 그 덩어리가 놓이는
+   자리뿐입니다 — 좁은 화면은 아래, 961 부터는 화면 한가운데. */
+.kv__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-600);
+  inline-size: 100%;
+}
+
+.kv__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-300);
+  inline-size: 100%;
+  text-align: center;
+}
+
+/* 영문 헤드라인이라 display-en 을 씁니다 — 세리프(Crimson Pro)에 행간 85%.
+   .kv 가 본문 서체를 깔아두므로 font-family 까지 함께 적어야 합니다. */
+.kv__headline {
+  margin: 0;
+  font-family: var(--typography-display-en-s-semibold-font-family);
+  font-size: var(--typography-display-en-s-semibold-font-size);
+  font-weight: var(--typography-display-en-s-semibold-font-weight);
+  line-height: var(--typography-display-en-s-semibold-line-height);
+  letter-spacing: var(--typography-display-en-s-semibold-letter-spacing);
+}
+
+/* 문장 끝 마침표만 브랜드 색입니다. */
+.kv__dot { color: var(--colors-fg-brand); }
+
+.kv__sub {
+  margin: 0;
+  font-size: var(--typography-body-m-regular-font-size);
+  font-weight: var(--typography-body-m-regular-font-weight);
+  line-height: var(--typography-body-m-regular-line-height);
+  letter-spacing: var(--typography-body-m-regular-letter-spacing);
+}
+
+.kv__cta { inline-size: 100%; }
+
+/* ---- 페이지네이션 (~960) ----------------------------------------------- */
+
+/* 숫자 인디케이터는 좁은 화면에만 둡니다. 961 부터는 좌우 화살표가 그 역할을
+   하므로 아래 미디어 쿼리에서 감춥니다. 한 장뿐일 때도 감춥니다 — "1 / 1" 은
+   알려주는 것이 없습니다. */
+/* 사진 위에 얹힌 표시입니다 — 흐름에서 빼두어야 문구가 사진 한가운데에 섭니다.
+   줄로 두면 그만큼 위를 차지해, 가운데가 그 높이의 절반만큼 올라갑니다. */
+.kv__pagination {
+  position: absolute;
+  inset-block-end: var(--spacing-300);
+  inset-inline-end: var(--spacing-500);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-50);
+  margin: 0;
+  font-size: var(--typography-body-s-regular-font-size);
+  line-height: var(--typography-body-s-regular-line-height);
+}
+
+.kv-group[data-slides='1'] .kv__pagination { display: none; }
+.kv__pagination b { font-weight: var(--typography-body-s-semibold-font-weight); }
+
+/* ---- 441~960 ----------------------------------------------------------- */
+@media (min-width: 441px) {
+  .kv { min-block-size: var(--_kv-min-height-sm); }
+  .kv__content { max-inline-size: 640px; }
+
+}
+
+/* ---- 961~ -------------------------------------------------------------- */
+@media (min-width: 961px) {
+  .kv {
+    justify-content: center;
+    min-block-size: var(--_kv-min-height-md);
+    border-radius: var(--_kv-rounded-md);
+  }
+
+  .kv__content {
+    flex-direction: row;
+    align-items: center;
+    max-inline-size: none;
+    /* 티어와 무관하게 40 입니다. 더 들어가면 가운데 텍스트가 좁아집니다. */
+    padding: 0 var(--spacing-1000);
+  }
+
+  /* 좌우 화살표 사이의 남은 폭을 전부 씁니다. */
+  .kv__body {
+    flex: 1 0 0;
+    min-inline-size: 0;
+  }
+
+  /* 넓은 화면에서는 좌우 화살표가 자리를 알려줍니다. */
+  .kv__pagination { display: none; }
+
+  /* 1024~1600 구간에서 헤드라인이 60 → 68 로 자랍니다. Figma 가 같은 티어의
+     1024 프레임과 1600 프레임에 두 단계를 그려두어 유동 스케일로 읽었습니다 —
+     영문 헤드라인이므로 그 두 단계는 display-en 의 l 과 xl 입니다.
+     ⚠️ 단계 전환이 의도였다면 이 clamp 를 고정값으로 바꿔야 합니다. */
+  .kv__headline {
+    font-size: clamp(
+      var(--typography-display-en-l-semibold-font-size),
+      calc(45.78px + 1.3889vw),
+      var(--typography-display-en-xl-semibold-font-size)
+    );
+  }
+
+  .kv__sub {
+    font-size: var(--typography-body-l-regular-font-size);
+    line-height: var(--typography-body-l-regular-line-height);
+  }
+
+  .kv__cta { inline-size: 320px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kv__nav,
+  .kv__media { transition: none; }
+}
+
+/* ---- 여러 장일 때 -------------------------------------------------------
+   KV 가 둘 이상이면 가로로 넘겨 봅니다. 다음 장은 화면 오른쪽에 살짝 걸쳐 힌트로
+   보이고, 현재 장이 되면 원래 크기로 커집니다.
+
+     <section class="kv-group">
+       <div class="kv-group__track">
+         <div class="kv-group__slide"><article class="kv is-current"> … </article></div>
+         <div class="kv-group__slide"><article class="kv">             … </article></div>
+       </div>
+     </section>
+
+   넘기는 칸(__slide)과 소재(.kv)를 나눠둔 것은 크기 때문입니다. 브라우저는 스냅
+   자리를 "줄어든 뒤"의 상자로 재는데, 줄어드는 것이 곧 스냅 대상이면 그 자리가
+   장마다 달라집니다 — 왼쪽 장은 오른쪽 변을 붙들고 줄어 왼쪽 변이 안으로 들어와,
+   뒤로 넘기면 한 장에 못 미친 곳에 서고 한 번 더 밀어야 했습니다. 칸은 제자리에
+   두고 그 안의 소재만 줄입니다.
+
+   is-current 와 장 수(data-slides)는 kv-carousel.js 가 붙입니다. 한 장뿐이면
+   페이지네이션을 감춥니다 — "1 / 1" 은 알려주는 것이 없습니다.
+*/
+
+.kv-group { position: relative; }
+
+.kv-group__track {
+  display: flex;
+  gap: var(--_kv-slide-gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.kv-group__track::-webkit-scrollbar { display: none; }
+
+/* 넘기는 단위는 칸입니다. 칸은 줄어들지 않으므로 스냅 자리도 움직이지 않습니다. */
+.kv-group__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.kv-group[data-slides='1'] .kv__pagination { display: none; }
+
+/* 영상이 아닌 장은 가릴 이유가 없습니다 — is-playing 을 기다리지 않습니다. */
+.kv__media:not([data-youtube]) { opacity: 1; }
+
+/* 사진은 영상과 달리 키워서 잘라낼 필요가 없습니다. */
+.kv__media > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* 좁은 화면에서는 CTA 를 두지 않습니다. 화면 아래 앱바가 이동을 맡고 있고,
+   KV 는 넘겨 보는 자리라 버튼까지 얹으면 손이 갈 곳이 겹칩니다. */
+@media (max-width: 960px) {
+  .kv__cta { display: none; }
+
+  /* 헤드라인은 화면이 좁아지면 따라 줄어듭니다.
+     줄을 나누는 것은 <br> 입니다. 크기를 고정해두면 작은 기기에서 한 줄이 폭을
+     넘겨 스스로 한 번 더 접히고, 두 줄로 쓴 문장이 서너 줄이 되어 읽는 호흡이
+     끊깁니다. 화면이 내주는 폭만큼만 줄여서 <br> 이 나눈 두 줄을 지킵니다.
+
+     5.25 는 가장 긴 줄("Not a waste,")이 글자 크기의 몇 배를 차지하는지입니다 —
+     재어보면 5.073 이고, 자간과 반올림으로 반 픽셀이 모자라 접히는 일이 있어 여유를
+     조금 얹었습니다. 가용 폭을 그 배수로 나눈 값이 곧 그 줄이 한 줄에 들어가는
+     크기입니다.
+     ⚠️ 문구가 길어지면 이 배수도 함께 커져야 합니다. 크기를 계속 줄여 맞추는 것보다
+     운영에서 글자 수를 제한하는 편이 맞습니다. */
+  .kv__headline {
+    font-size: min(
+      var(--typography-display-en-s-semibold-font-size),
+      calc((100vw - 2 * var(--container-gutter-base) - 2 * var(--spacing-800)) / 5.25)
+    );
+  }
+}
+
+/* ---- 여러 장 · 961~ ----------------------------------------------------
+   넓은 화면에서는 소재끼리 붙습니다. 둥근 모서리는 KV 영역 전체가 갖고, 소재
+   자체는 각지게 둡니다 — 넘길 때 모서리가 소재를 따라다니면 한 덩어리로 보이지
+   않습니다. 트랙에 반지름을 주면 그 자체가 마스크가 되어 안쪽 소재를 잘라냅니다.
+*/
+@media (min-width: 961px) {
+  .kv-group__track {
+    gap: 0;
+    border-radius: var(--_kv-rounded-md);
+  }
+
+  .kv-group .kv { border-radius: 0; }
+}
+
+/* ---- 좌우 이동 버튼 (961~) ---------------------------------------------
+   버튼 컴포넌트를 그대로 씁니다 — .btn--blur.btn--medium.btn--icon-only.is-on.
+   좁은 화면에서는 스와이프로 넘기므로 두지 않습니다.
+*/
+
+.kv__nav { display: none; }
+
+@media (min-width: 961px) {
+  /* 평소에는 비어 있다가 KV 위에 마우스를 올리거나 키보드가 들어올 때 나타납니다.
+     display 를 껐다 켜면 가운데 텍스트 폭이 흔들리므로 자리는 늘 차지합니다. */
+  .kv__nav {
+    display: inline-flex;
+    opacity: 0;
+    transition: opacity var(--_duration-fast) var(--_easing-standard);
+  }
+
+  .kv:hover .kv__nav,
+  .kv:focus-within .kv__nav { opacity: 1; }
+}
+
+/* ---- 힌트 (~960) --------------------------------------------------------
+   좁은 화면에서만 다음 장이 걸쳐 보입니다. 넓은 화면은 KV 가 이미 크고 좌우
+   버튼이 있어 힌트가 필요하지 않습니다.
+*/
+@media (max-width: 960px) {
+  /* 다음 장이 화면 가장자리까지 흘러야 합니다. 컨테이너 여백 안에 갇히면
+     힌트가 여백 앞에서 잘립니다. */
+  .kv-group__track {
+    margin-inline: calc(-1 * var(--container-gutter-base));
+    padding-inline: var(--container-gutter-base);
+    scroll-padding-inline: var(--container-gutter-base);
+  }
+
+  /* 현재가 아닌 장은 물러나 있습니다. 줄어드는 축은 그 장이 어느 쪽에 있느냐가
+     정합니다 — 오른쪽 장은 왼쪽 변을, 왼쪽 장은 오른쪽 변을 붙들어야 화면 쪽을
+     향한 변이 제자리에 남아 그만큼 보입니다. 한쪽으로 고정하면 반대쪽 장은 줄어들면서
+     화면 밖으로 끌려 나갑니다 — 마지막 장에서 이전 장이 아예 안 보였습니다.
+     세로는 어느 쪽이든 가운데를 기준으로 줄어듭니다.
+
+     크기는 kv-carousel.js 가 스크롤 위치를 따라 매 프레임 넣어줍니다. 전환에
+     맡기면 스냅이 끝난 뒤에야 한 번에 커져서 툭 튀어 오르는 것처럼 보입니다.
+     손가락을 따라 조금씩 자라야 부드럽습니다.
+
+     기본값이 1 인 것은 스크립트가 없을 때를 위한 것입니다 — 그 경우 모든 장이
+     원래 크기로 남습니다. 작아진 채로 굳는 것보다 낫습니다. */
+  .kv-group .kv {
+    transform-origin: var(--kv-slide-origin, left) center;
+    scale: var(--kv-slide-scale, 1);
+  }
+
+  /* 넘기는 동안에만 켭니다. 안에 영상이 들어 있어, 이것이 없으면 크기가 바뀔
+     때마다 영상까지 다시 그려집니다. kv-carousel.js 가 멈추면 바로 뗍니다. */
+  .kv-group__track.is-scrolling .kv { will-change: scale; }
+}
+
+/* 움직임을 줄이도록 설정한 경우에는 크기 변화 자체를 두지 않습니다. */
+@media (prefers-reduced-motion: reduce) {
+  .kv-group .kv { scale: 1; }
+}

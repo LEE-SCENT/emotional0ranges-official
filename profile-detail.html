@@ -1,0 +1,434 @@
+<!doctype html>
+<!-- 상세 프로필 — 마이 > 상세 프로필.
+     탭 넷(상세 정보 · 라이프 · 가치관 · 한마디)으로 나눠 고르고, 오른쪽 카드는 지금
+     보고 있는 탭의 것을 보여줍니다(profile-detail.js). -->
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>상세 프로필 — 감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 프로필 카드의 한마디에만 쓰는 명조입니다. 조각으로 나뉘어 있어 쓰인 글자만 받습니다. -->
+<link rel="stylesheet" href="./fonts/nanum-myeongjo/nanum-myeongjo.css?v=481777f6">
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/tag.css?v=fef5c195">
+<link rel="stylesheet" href="./components/checkbox.css?v=44baaa09">
+<link rel="stylesheet" href="./components/field.css?v=30705fc7">
+<link rel="stylesheet" href="./components/choice.css?v=14663585">
+<link rel="stylesheet" href="./components/tabs.css?v=a962487a">
+<link rel="stylesheet" href="./components/verified-banner.css?v=34c301e8">
+<link rel="stylesheet" href="./components/profile-card.css?v=351d3a47">
+<link rel="stylesheet" href="./components/profile.css?v=4e1f19b6">
+<link rel="stylesheet" href="./components/verify.css?v=9ecc570b">
+<link rel="stylesheet" href="./components/confirm.css?v=6a6a0bdf">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/bottom-cta.css?v=4d73a6db">
+<link rel="stylesheet" href="./components/top-bar.css?v=7633d627">
+<style>
+  body {
+    margin: 0;
+    background: var(--colors-bg);
+    color: var(--colors-fg);
+    font-family: var(--_font-family-base);
+  }
+  /* 화면에는 안 보이지만 스크린리더는 읽는 텍스트 */
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<!-- 다른 화면과 같은 GNB 입니다. 좁은 화면에서는 아래 topBar 가 대신합니다(top-bar.css). -->
+<header class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <a class="btn btn--ghost btn--medium" href="./meetups.html"><span class="btn__label">모임</span></a>
+        <a class="btn btn--ghost btn--medium" href="./matching.html"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <!-- 로그인하지 않았을 때만 남습니다. 로그인한 사람에게는 아래 목록이
+             누구인지 말하고 있어 my-menu.js 가 이 버튼을 지웁니다. -->
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <!-- 내 메뉴. GNB 가운데 줄의 메뉴가 서비스를 둘러보는 길이라면, 여기는
+             내 프로필·결제·설정처럼 나에게만 해당하는 것들이 섭니다(my-menu.js). -->
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 좁은 화면에서 GNB 를 대신합니다(profile.html 과 같습니다). -->
+<header class="top-bar top-bar--page">
+  <a class="btn btn--ghost btn--medium btn--icon-only" data-back data-profile-leave="back" href="./my.html" aria-label="뒤로">
+    <svg class="btn__icon" aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+  </a>
+  <button class="btn btn--outlined btn--medium" type="button" data-profile-preview-open>
+    <span class="btn__label">프로필 미리보기</span>
+  </button>
+</header>
+
+<main class="container profile profile--detail has-bottom-cta">
+  <header class="profile__header">
+    <a class="btn btn--blur btn--medium btn--icon-only" data-back data-profile-leave="back" href="./my.html" aria-label="뒤로">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+    </a>
+    <div class="profile__title">
+      <h1>상세 프로필</h1>
+    </div>
+  </header>
+
+  <div class="profile__body">
+    <form class="profile__form" data-profile-form novalidate>
+      <!-- 완성도. 카드 교환의 문턱(80%)이 이 화면을 채우는 까닭이라, 탭보다 먼저 섭니다.
+           숫자와 막대는 고르는 대로 따라 오릅니다(profile-detail.js). 문턱까지 얼마나
+           남았는지는 막대 아래 한 줄이 "n개 더"로 말합니다. -->
+      <section class="profile-progress" aria-labelledby="profile-progress-label" data-progress>
+        <div class="profile-progress__head">
+          <p class="profile-progress__label" id="profile-progress-label">완성도 <b data-progress-percent>0%</b></p>
+        </div>
+        <div class="profile-progress__bar" role="progressbar" aria-labelledby="profile-progress-label"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span class="profile-progress__fill" data-progress-fill></span>
+        </div>
+        <div class="profile-progress__foot">
+          <p class="profile-progress__note" data-progress-note aria-live="polite"></p>
+          <button class="btn btn--outlined btn--small" type="button" data-progress-jump>
+            <span class="btn__label">다음 항목 채우기</span>
+            <!-- 누르면 그 칸으로 갑니다. 이 자리에서 무언가를 하는 버튼이 아니라 다른 자리로
+                 데려가는 버튼이라는 표시입니다(Button 의 기본 꼴과 같습니다). -->
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- 네 구획이 한 페이지에 이어집니다. 탭은 화면을 가르는 것이 아니라 구획으로 가는
+           길입니다 — 누르면 그 구획으로 내려가고, 읽어 내려가면 지금 보고 있는 구획의
+           탭이 켜집니다(profile-detail.js). 저장은 하나이고 넷을 함께 저장합니다. -->
+      <nav class="tabs profile__tabs" aria-label="상세 프로필 구획" data-profile-tabs>
+        <span class="tabs__thumb" aria-hidden="true"></span>
+        <button class="tabs__item is-active" type="button" aria-current="true" data-tab="info">상세 정보</button>
+        <button class="tabs__item" type="button" data-tab="life">라이프</button>
+        <button class="tabs__item" type="button" data-tab="values">가치관</button>
+        <button class="tabs__item" type="button" data-tab="words">한마디</button>
+      </nav>
+
+      <!-- 선택지는 profile-detail.js 가 그립니다(QUESTIONS). 여기에는 고르는 것이
+           아닌 칸 — 학력과 학교 — 만 적혀 있습니다. -->
+      <section class="profile__panel" id="info" aria-label="상세 정보" data-panel="info">
+        <div data-q="mbti"></div>
+
+        <div class="profile__section">
+          <div class="field" role="group" aria-labelledby="profile-edu-label" data-unit="edu">
+            <span class="field__label" id="profile-edu-label">학력</span>
+            <div class="choice-group" role="radiogroup" aria-label="학력">
+              <label class="choice"><input type="radio" name="edu-level" value="고등학교"><span>고등학교</span></label>
+              <label class="choice"><input type="radio" name="edu-level" value="전문대"><span>전문대</span></label>
+              <label class="choice"><input type="radio" name="edu-level" value="대학교"><span>대학교</span></label>
+              <label class="choice"><input type="radio" name="edu-level" value="석사"><span>석사</span></label>
+              <label class="choice"><input type="radio" name="edu-level" value="박사"><span>박사</span></label>
+              <label class="choice"><input type="radio" name="edu-level" value="기타"><span>기타</span></label>
+            </div>
+          </div>
+
+          <!-- 학교 · 학교 인증 · 학교 공개 여부. 운영 사이트와 같은 차례와 글자입니다.
+               인증은 띠가 아니라 칸 아래 한 줄의 링크입니다. -->
+          <div class="field" data-unit="school">
+            <label class="field__label" for="profile-school">학교</label>
+            <div class="text-field">
+              <input id="profile-school" type="text" name="school" placeholder="짧게 적어주세요" autocomplete="off">
+            </div>
+            <p class="field__help">
+              <button class="profile__link" type="button" data-verify-open="school">증명서로 인증하기</button>
+              · 승인되면 프로필에 뱃지가 붙어요
+            </p>
+          </div>
+
+          <div class="field" role="group" aria-labelledby="profile-school-public-label" data-unit="school-public">
+            <span class="field__label" id="profile-school-public-label">학교 공개 여부</span>
+            <div class="choice-group" role="radiogroup" aria-label="학교 공개 여부">
+              <label class="choice"><input type="radio" name="school-public" value="공개 (노출함)"><span>공개 (노출함)</span></label>
+              <label class="choice"><input type="radio" name="school-public" value="비공개 (노출 안 함)"><span>비공개 (노출 안 함)</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div data-q="charms"></div>
+      </section>
+
+      <hr class="profile__divider">
+      <section class="profile__panel" id="life" aria-label="라이프" data-panel="life"></section>
+      <hr class="profile__divider">
+      <section class="profile__panel" id="values" aria-label="가치관" data-panel="values">
+        <!-- 민감정보 동의. 가치관의 맨 끝으로 옮겨집니다(profile-detail.js). 체크가 곧 동의이고,
+             체크하면 바로 아래 두 물음이 열립니다. 동의한 값은 감춰진 칸(sensitive-consent)에
+             담겨 저장됩니다. 동의한 뒤에도 체크된 채 접혀 남고, 체크를 풀면 철회입니다(고객센터로도).
+             생김새와 접기는 결제의 필수 동의(checkout.html)와 같습니다. -->
+        <div class="profile-sensitive" data-sensitive>
+          <label class="checkbox">
+            <input type="checkbox" id="sensitive-agree" data-sensitive-agree
+                   aria-labelledby="sensitive-agree-title">
+            <span class="checkbox__box" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span>
+          </label>
+          <div class="profile-sensitive__body">
+            <div class="profile-sensitive__head">
+              <label class="profile-sensitive__text" for="sensitive-agree">
+                <b id="sensitive-agree-title">[선택] 민감정보(정치적 견해·종교) 수집·이용에 동의합니다</b>
+                <span>동의하면 정치 성향·종교 문항이 열려요</span>
+              </label>
+              <!-- 결제의 규정 접기와 같습니다. 펼친 채로 시작하고, 읽은 사람이 스스로 접습니다
+                   (profile-detail.js). -->
+              <button class="profile-sensitive__toggle" type="button" aria-expanded="true"
+                      aria-controls="sensitive-terms" aria-label="안내 접기" data-sensitive-toggle>
+                <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+              </button>
+            </div>
+            <div class="profile-sensitive__terms" id="sensitive-terms" aria-label="민감정보 수집·이용 안내">
+              <div class="profile-sensitive__terms-inner">
+                <p>아래 항목은 개인정보 보호법 제23조의 민감정보(정치적 견해, 종교)에 해당합니다.</p>
+                <ul>
+                  <li>수집 항목: 정치 성향, 종교, 종교 참여 정도</li>
+                  <li>수집·이용 목적: 이상형 매칭 서비스 제공(프로필 카드 표시 및 매칭 추천)</li>
+                  <li>보유·이용 기간: 회원 탈퇴 시 또는 동의 철회 시까지</li>
+                  <li>동의 거부 권리: 동의하지 않으셔도 서비스 이용에 불이익이 없습니다.</li>
+                </ul>
+                <p>동의하지 않으면 해당 문항은 표시되지 않고 프로필 완성도에서도 제외됩니다.
+                  동의 철회는 이 화면에서 체크를 해제하거나 고객센터로 요청하실 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+          <input type="checkbox" name="sensitive-consent" hidden>
+        </div>
+        <div data-q="politics"></div>
+        <div data-q="religion"></div>
+        <!-- 선개팅 추가 프로필(기존 사이트에서 옮겨 왔습니다). 경제 가치관 앞으로 옮겨지고,
+             접혀 있다가 펼칩니다(profile-detail.js). 고르는 물음은 data-q 자리에 그려지고,
+             글로 받는 두 칸만 여기 적혀 있습니다. 모두 답하지 않아도 되고, 선개팅 모임에서
+             상대가 볼 때만 보여 완성도에도 옆의 프로필 카드에도 들지 않습니다. -->
+        <div class="profile-extra" data-seon>
+          <div class="profile-extra__head">
+            <p class="profile-extra__text">
+              <!-- 선택이라는 것은 제목이 말하고(약관 동의의 [선택]과 달리 묶음의 이름이라 뒤에 답니다),
+                   아래 한 줄은 어디에 보이는지만 말합니다. -->
+              <b id="profile-seon-title">선개팅 추가 프로필 <small>(선택)</small></b>
+              <span>선개팅 모임에서 상대가 내 프로필을 볼 때만 보여요</span>
+            </p>
+            <!-- 펼치고 접는 것은 민감정보 동의 · 결제 규정과 같은 화살표입니다. 머리 줄 전체가 눌립니다. -->
+            <button class="profile-sensitive__toggle profile-extra__toggle" type="button" data-seon-toggle
+                    aria-expanded="false" aria-controls="profile-seon-body" aria-label="선개팅 추가 프로필 펼치기">
+              <svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg>
+            </button>
+          </div>
+          <div class="profile-extra__body" id="profile-seon-body" data-seon-body hidden>
+            <p class="profile-extra__group">결혼 후 가정 관리</p>
+            <div data-q="seon-leave"></div>
+            <div data-q="seon-money"></div>
+            <div data-q="seon-in-laws"></div>
+            <div class="field">
+              <label class="field__label" for="profile-seon-wish">결혼 시기, 방법에 대한 희망 사항</label>
+              <div class="text-field">
+                <input id="profile-seon-wish" type="text" name="seon-wish" maxlength="100" autocomplete="off"
+                       placeholder="짧게 적어주세요">
+              </div>
+            </div>
+            <!-- 연소득 · 자산은 가정 관리가 아니라 따로 묶습니다. -->
+            <p class="profile-extra__group">경제 정보</p>
+            <div data-q="seon-income"></div>
+            <div data-q="seon-assets"></div>
+
+            <p class="profile-extra__group">가족 정보</p>
+            <div data-q="seon-father"></div>
+            <div data-q="seon-father-job"></div>
+            <div data-q="seon-mother"></div>
+            <div data-q="seon-mother-job"></div>
+            <div data-q="seon-siblings"></div>
+            <div class="field">
+              <label class="field__label" for="profile-seon-hometown">본가 지역</label>
+              <div class="text-field">
+                <input id="profile-seon-hometown" type="text" name="seon-hometown" maxlength="30" autocomplete="off"
+                       placeholder="짧게 적어주세요">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      <hr class="profile__divider">
+
+      <section class="profile__panel" id="words" aria-label="한마디" data-panel="words">
+        <div class="field" data-unit="words">
+          <!-- 구획이 이어져 있어, 이 칸에도 다른 물음처럼 이름표가 섭니다.
+               이름표와 한도(2000)는 기존 사이트의 "마지막 어필"을 따랐습니다. 탭과 카드의
+               머리말은 구획의 이름(한마디) 그대로입니다. -->
+          <label class="field__label" for="profile-words">마지막 어필</label>
+          <div class="text-field text-field--area">
+            <textarea id="profile-words" name="words" maxlength="2000" aria-describedby="profile-words-count"
+                      placeholder="입력해 주세요 (선택 사항)"></textarea>
+          </div>
+          <p class="field__count" id="profile-words-count"><b data-words-count>0</b>/2000</p>
+        </div>
+      </section>
+
+      <!-- 고르면 바로, 글은 칸을 떠날 때 저절로 저장됩니다(profile-detail.js). 그래서 끝의 버튼은 저장이 아니라 [완료]입니다 — 다 됐으면
+           나갑니다. 넓은 화면에서는 읽어 내려가는 동안 화면 아래에 붙어 따라오다가 폼의 끝에서
+           제자리에 섭니다(profile.css). 좁은 화면에서는 아래의 bottom-cta 가 대신합니다.
+           저장 안내는 넓은 화면에서 버튼 바로 아래에 붙어 함께 따라옵니다. 좁은 화면에서는
+           화면 아래 붙은 띠를 한 줄 더 키우지 않도록 폼의 끝에 둡니다(같은 글이 둘이고, 한
+           번에 하나만 보입니다). -->
+      <p class="profile__autosave profile__only-narrow">선택하거나 입력하면 바로 저장돼요.</p>
+      <div class="profile__actions">
+        <button class="btn btn--filled btn--large profile__save" type="button" data-profile-done>
+          <span class="btn__label">완료</span>
+        </button>
+        <p class="profile__autosave">선택하거나 입력하면 바로 저장돼요.</p>
+      </div>
+    </form>
+
+    <aside class="profile__aside" aria-label="프로필 카드 미리보기">
+      <article class="profile-card profile-card--detail" data-profile-card></article>
+    </aside>
+  </div>
+</main>
+
+<div class="bottom-cta">
+  <button class="btn btn--filled btn--large" type="button" data-profile-done>
+    <span class="btn__label">완료</span>
+  </button>
+</div>
+
+<!-- 고친 것이 남은 채 뒤로 나가려 할 때 -->
+<dialog class="confirm confirm--sheet" id="profile-leave" aria-labelledby="profile-leave-title">
+  <div class="confirm__panel">
+    <!-- 버튼은 둘입니다 — 떠나는 두 길(저장하지 않고 · 저장하고). 떠나지 않는 길은 버튼이
+         아니라 닫기입니다: 오른쪽 위의 ×, 창 바깥, Esc. 셋을 한 줄에 세우면 무엇이 이 창의
+         답이고 무엇이 물러나는 것인지가 섞입니다. -->
+    <button class="btn btn--ghost btn--medium btn--icon-only confirm__close" type="button" data-confirm-close aria-label="닫고 계속 작성">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+    <div class="confirm__text">
+      <h2 id="profile-leave-title">저장하지 않은 변경사항이 있어요<br>저장하고 나갈까요?</h2>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-profile-discard><span class="btn__label">저장 안 함</span></button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept><span class="btn__label">저장하고 나가기</span></button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 민감정보 동의 철회. 답한 것이 있을 때만 묻습니다(profile-detail.js). 지우는 쪽이 오른쪽
+     버튼이고, 물러나는 길은 [취소]와 창 바깥 · Esc 입니다. -->
+<dialog class="confirm confirm--sheet" id="sensitive-withdraw" aria-labelledby="sensitive-withdraw-title">
+  <div class="confirm__panel">
+    <div class="confirm__text">
+      <h2 id="sensitive-withdraw-title">민감정보 동의를 철회할까요?</h2>
+      <p>정치 성향·종교 답이 지워지고 프로필에서도 빠져요.</p>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-confirm-close><span class="btn__label">취소</span></button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept><span class="btn__label">동의 철회</span></button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 좁은 화면의 프로필 미리보기. 카드는 옆 단의 것과 같은 것을 그립니다. -->
+<dialog class="profile-preview" id="profile-preview" aria-label="프로필 미리보기">
+  <div class="profile-preview__track">
+    <article class="profile-card profile-card--detail" data-profile-card="info"></article>
+    <article class="profile-card profile-card--detail" data-profile-card="life"></article>
+    <article class="profile-card profile-card--detail" data-profile-card="values"></article>
+    <article class="profile-card profile-card--detail" data-profile-card="words"></article>
+  </div>
+  <button class="btn btn--blur btn--medium btn--icon-only is-on" type="button" data-profile-preview-close aria-label="닫기">
+    <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+  </button>
+</dialog>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  const { initConfirms } = await import('./components/confirm.js?v=f516d2db')
+  initConfirms()
+  const { initProfileDetail } = await import('./components/profile-detail.js?v=d250034f')
+  initProfileDetail()
+  const { initTabs } = await import('./components/tabs.js?v=aec7319a')
+  initTabs()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initVerify } = await import('./components/verify.js?v=464fd775')
+  initVerify()
+  // 고르는 칸(셀렉트·달·날짜)은 고르고 나면 초점을 내려놓습니다.
+  const { initFields } = await import('./components/field.js?v=de1ad19d')
+  initFields()
+  // 고친 것이 남아 있으면 profile-form.js 가 먼저 받아 한 번 묻습니다.
+  const { initBack } = await import('./components/back.js?v=c6d259cc')
+  initBack()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>

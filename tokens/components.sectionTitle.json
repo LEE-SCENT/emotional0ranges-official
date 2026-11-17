@@ -1,0 +1,17 @@
+{
+  "components": {
+    "sectionTitle": {
+      "$description": "섹션 머리말. 제목·설명과 우측 이동 버튼으로 이루어집니다.",
+      "fg": {
+        "$type": "color",
+        "$value": "{semantic.colors.fg}",
+        "$description": "Figma 도 semantic/fg 로 바인딩되어 있습니다."
+      },
+      "fgDescription": {
+        "$type": "color",
+        "$value": "{semantic.colors.fg-lower}",
+        "$description": "Figma 도 semantic/fg-lower 로 바인딩되어 있습니다."
+      }
+    }
+  }
+}

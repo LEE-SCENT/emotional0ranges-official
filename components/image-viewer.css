@@ -1,0 +1,332 @@
+/**
+ * ImageViewer — 상세 화면의 사진을 화면 전체에 펼쳐 보는 팝업.
+ *
+ *   <dialog class="image-viewer" data-view="list"> … </dialog>
+ *
+ * 한 팝업 안에 두 화면이 들어 있고 data-view 로 갈아탑니다.
+ *
+ *   list    미리보기 목록. 세 칸 벽돌쌓기.
+ *   single  사진 한 장. 원본 비율대로 가로로 눕거나 세로로 섭니다.
+ *
+ * 둘을 각각의 팝업으로 나누지 않은 이유는 목록 ↔ 개별을 오갈 때마다 팝업이 닫혔다
+ * 열리면 그 사이에 뒤 페이지가 한 번 비치기 때문입니다. 같은 자리에서 내용만 바뀌면
+ * 사진을 보다가 목록으로 물러나는 동작이 끊기지 않습니다.
+ *
+ * <dialog> 를 쓰는 것은 showModal() 이 주는 것들 때문입니다 — Esc 로 닫기, 뒤
+ * 페이지를 읽지도 누르지도 못하게 막기, 초점을 팝업 안에 가두기. 직접 만들면 마지막
+ * 하나에서 거의 항상 실수합니다.
+ */
+
+.image-viewer {
+  /* dialog 의 기본값(가운데 정렬된 작은 상자)을 전부 지웁니다. */
+  inline-size: 100%;
+  max-inline-size: 100%;
+  /* 100% 가 아니라 100dvh 입니다. iOS 사파리에서 모달의 기준이 되는 상자는 주소창
+     ·툴바가 덮은 자리까지 포함해, 100% 로 두면 상자가 화면보다 커집니다. 아래에
+     붙는 것(시트의 신청 버튼)이 툴바 뒤로 들어가 보이지 않았습니다. */
+  block-size: 100dvh;
+  max-block-size: 100dvh;
+  padding: 0;
+  border: 0;
+  background: var(--colors-bg);
+  color: var(--colors-fg);
+  /* 방향은 [open] 이 아니라 여기에 둡니다 — display 만 allow-discrete 로 전환되고
+     flex-direction 은 닫는 순간 바로 풀려, 내용이 한 번 가로로 눕고 사라집니다. */
+  flex-direction: column;
+}
+
+.image-viewer[open] { display: flex; }
+
+/* 화면을 꽉 채우므로 뒤가 비칠 자리가 없습니다. 그래도 열리는 순간 흰 배경이
+   깔리기 전에 한 겹 받쳐둡니다. */
+.image-viewer::backdrop { background: var(--colors-bg); }
+
+/* ---- 열고 닫기 ----------------------------------------------------------
+   사진을 눌렀는데 화면이 통째로 갈아끼워지면 어디에서 어디로 왔는지 알 수 없습니다.
+   살짝 커지며 나타나게 두면 "이 자리에서 펼쳐졌다"로 읽힙니다.
+
+   display 와 top layer 는 원래 중간값이 없어 전환되지 않습니다. transition-behavior
+   와 overlay 를 함께 적어야 닫히는 동안 팝업이 화면에 남아 사라지는 것을 보여줍니다 —
+   이것이 없으면 열 때만 움직이고 닫을 때는 툭 사라집니다.
+
+   지원하지 않는 브라우저에서는 전환만 생략되고 여닫는 동작 자체는 그대로입니다.
+*/
+
+.image-viewer,
+.image-viewer::backdrop {
+  transition:
+    opacity var(--_duration-base) var(--_easing-standard),
+    scale var(--_duration-base) var(--_easing-standard),
+    display var(--_duration-base) allow-discrete,
+    overlay var(--_duration-base) allow-discrete;
+}
+
+.image-viewer[open] { opacity: 1; scale: 1; }
+
+/* 닫히는 동안(그리고 열리기 직전)의 모습. 두 자리에 같은 값을 적는 것은
+   @starting-style 이 "열리기 직전"만 가리키기 때문입니다. */
+.image-viewer { opacity: 0; scale: 0.98; }
+.image-viewer::backdrop { opacity: 0; }
+.image-viewer[open]::backdrop { opacity: 1; }
+
+@starting-style {
+  .image-viewer[open] { opacity: 0; scale: 0.98; }
+  .image-viewer[open]::backdrop { opacity: 0; }
+}
+
+/* ---- topBar -------------------------------------------------------------
+   왼쪽 닫기, 오른쪽 목록 보기, 가운데에 지금 위치. 줄 자체는 .top-bar 가 그립니다 —
+   상세 화면의 모바일 헤더와 Figma 에서도 같은 컴포넌트입니다. 여기서는 이 화면에서만
+   다른 것을 얹습니다.
+*/
+
+.image-viewer__bar {
+  flex: none;
+  /* 목록이 아래에서 스크롤되어 올라옵니다. 줄이 위에 있어야 글자가 사진에 묻히지
+     않습니다. */
+  z-index: 1;
+}
+
+/* ---- 본문 ---------------------------------------------------------------
+   높이는 화면에서 topBar 를 뺀 만큼이고, 그 안에서 아래로 bottomGap 을 비웁니다.
+   1024 높이 기준으로 사진이 놓일 자리는 912 가 됩니다.
+
+   dvh 를 쓰는 것은 모바일 브라우저의 주소창 때문입니다. vh 는 주소창이 접힌 상태를
+   기준으로 잡아, 주소창이 펼쳐져 있으면 사진 아래가 잘립니다.
+*/
+
+/* 초점은 본문이 받습니다(image-viewer.js) — 열자마자 닫기에 테가 둘리지 않게 하려는
+   것이라, 본문에 대신 테를 두르면 아무것도 나아지지 않습니다. */
+.image-viewer__body:focus { outline: none; }
+
+.image-viewer__body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block-end: var(--_image-viewer-bottom-gap);
+}
+
+/* ---- 목록 ---------------------------------------------------------------
+   사진마다 width/height 를 적어둡니다. 늦게 도착하는 사진일수록 자리를 미리 잡아둬야
+   합니다 — 비어 있던 칸이 사진이 도착하며 밀려 내려가면, 그 사이 누른 손가락은
+   엉뚱한 사진을 엽니다.
+
+   세 칸 벽돌쌓기. CSS 다단(columns)이면 브라우저가 세 칸의 높이를 알아서 맞춥니다.
+   grid 로 짜면 세로 위치를 직접 계산해야 하고, 사진이 늦게 도착해 비율을 알기
+   전까지는 그 계산이 틀립니다.
+
+   다단은 위에서 아래로 채운 뒤 다음 칸으로 넘어갑니다. 읽는 순서와 보이는 순서가
+   같아야 하므로 사진 순서도 그대로 세로로 흐릅니다.
+*/
+
+.image-viewer__list {
+  columns: 3;
+  column-gap: var(--_image-viewer-list-gap);
+  max-inline-size: var(--_image-viewer-list-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-gutter-md);
+  list-style: none;
+}
+
+.image-viewer__list li {
+  /* 사진이 칸 경계에서 두 동강 나지 않게 합니다. */
+  break-inside: avoid;
+  margin-block-end: var(--_image-viewer-list-gap);
+}
+
+.image-viewer__thumb {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--_image-viewer-rounded);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.image-viewer__thumb img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--_image-viewer-rounded);
+  transition: scale var(--_duration-base) var(--_easing-standard);
+}
+
+/* 잘라내는 것은 버튼이고 커지는 것은 사진이라, 확대해도 칸 크기와 벽돌쌓기 계산은
+   그대로입니다. transform 만 바뀌므로 다시 그리는 비용도 없습니다. */
+.image-viewer__thumb:hover img,
+.image-viewer__thumb:focus-visible img { scale: 1.04; }
+
+/* ---- 개별 사진 ----------------------------------------------------------
+   사진과 좌우 버튼을 한 줄에 두고 통째로 가운데에 놓습니다. 버튼을 사진 바깥에
+   absolute 로 붙이면 사진 폭이 바뀔 때마다 위치를 다시 계산해야 하는데, 한 줄로
+   묶으면 사진이 넓어지든 좁아지든 버튼이 알아서 24 만큼 떨어져 따라갑니다.
+
+   사진은 두 가지에 함께 걸립니다 — 가로로는 1000 을 넘지 않고, 세로로는 자리
+   높이를 넘지 않습니다. 가로 사진은 앞쪽에, 세로 사진은 뒤쪽에 먼저 걸리므로
+   비율을 따로 재서 분기할 필요가 없습니다.
+*/
+
+.image-viewer__single {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--_image-viewer-nav-gap);
+  block-size: 100%;
+  padding-inline: var(--spacing-400);
+}
+
+/* ---- 사진을 세운 줄 ------------------------------------------------------
+   사진은 다섯 장이 옆으로 나란히 서 있고, 넘기는 것은 스크롤입니다. 한 장을 두고
+   src 만 갈아끼우면 넘기는 동안 볼 것이 없어 한 번 깜빡이고, 손가락을 따라오지도
+   않습니다. 옆 장이 이미 옆에 서 있으면 미는 만큼 따라 들어옵니다.
+
+   다섯 장을 한꺼번에 들고 있어도 되는 것은 목록이 이미 같은 파일을 받아두었기
+   때문입니다 — 주소가 같아 다시 받지 않습니다. */
+
+.image-viewer__strip {
+  /* flex 항목은 기본적으로 제 내용보다 작아지지 않습니다. 풀어주지 않으면 좁은
+     창에서 사진이 버튼을 밀어냅니다. */
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  block-size: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* 옆으로 끝까지 민 뒤에도 계속 밀면 그 힘이 뒤 페이지로 넘어갑니다. 팝업 안에서
+     끝내야 합니다. */
+  overscroll-behavior-x: contain;
+}
+
+.image-viewer__strip::-webkit-scrollbar { display: none; }
+
+.image-viewer__frame {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100%;
+}
+
+.image-viewer__frame img {
+  display: block;
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: min(100%, var(--_image-viewer-max-image-width));
+  max-block-size: 100%;
+  border-radius: var(--_image-viewer-rounded);
+  object-fit: contain;
+}
+
+.image-viewer__nav { flex: none; }
+
+/* 지금 보고 있는 화면이 아닌 쪽은 자리도 차지하지 않습니다. */
+.image-viewer[data-view='list'] .image-viewer__single,
+.image-viewer[data-view='single'] .image-viewer__list { display: none; }
+
+/* 목록에서는 제목을, 개별 화면에서는 몇 번째인지를 보여줍니다. */
+.image-viewer[data-view='list'] .image-viewer__count,
+.image-viewer[data-view='single'] .image-viewer__title { display: none; }
+
+/* ---- 좁은 화면 ----------------------------------------------------------
+   961 미만에서는 사진이 화면 폭을 그대로 씁니다. 좌우 버튼을 둘 자리가 없습니다 —
+   바깥에 세우면 버튼 두 개와 그 여백(168)이 폭을 먹어 정작 보러 온 사진이 작아지고,
+   사진 위에 얹으면 넘기려다 사진을 가립니다. 넘기는 것은 손가락이 합니다
+   (image-viewer.js).
+
+   목록도 세 칸은 너무 좁아 두 칸으로 줄입니다.
+*/
+
+@media (max-width: 960px) {
+  .image-viewer__list {
+    columns: 2;
+    padding-inline: var(--container-gutter-base);
+  }
+
+  .image-viewer__single {
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  .image-viewer__nav { display: none; }
+
+  /* 화면 폭을 끝까지 쓰는 사진에는 모서리를 두지 않습니다. 둥근 모서리는 사진이
+     무엇인가의 안에 담겨 있다는 표시인데, 여기서는 담을 바깥이 없습니다. */
+  .image-viewer__frame img { border-radius: 0; }
+}
+
+/* 사진 한 장만 있으면 넘길 곳이 없습니다. */
+.image-viewer[data-count='1'] .image-viewer__nav { display: none; }
+
+/* ---- 모션 줄이기 --------------------------------------------------------
+   움직임에 불편을 느끼는 사람에게는 전환을 걷어냅니다. 여닫는 동작과 사진이 바뀌는
+   것 자체는 그대로 남아, 기능이 사라지지는 않습니다.
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  .image-viewer,
+  .image-viewer::backdrop,
+  .image-viewer__thumb img { transition: none; }
+
+  /* 줄이 미끄러지는 것도 멈춥니다. 넘기는 것 자체는 그대로입니다. */
+  .image-viewer__strip { scroll-behavior: auto; }
+
+  .image-viewer { scale: 1; }
+  .image-viewer__thumb:hover img,
+  .image-viewer__thumb:focus-visible img { scale: 1; }
+}
+
+/* ---- 목록 ↔ 개별 사이의 확대·축소 --------------------------------------
+   스크립트가 두 사진에 같은 이름을 붙여둡니다. 나머지는 브라우저가 두 자리 사이를
+   이어 그립니다.
+
+   목록의 사진은 원본 비율 그대로라 개별 화면의 사진과 모양이 같습니다. 겹쳐 놓으면
+   크기만 달라, 흐려졌다 나타나는 것이 아니라 그대로 줄고 커지는 것으로 보입니다.
+   그래서 두 장을 같은 곡선으로 함께 움직이고 서로 지우지 않도록 둡니다.
+*/
+
+::view-transition-group(viewer-photo) {
+  animation-duration: var(--_duration-base);
+  animation-timing-function: var(--_easing-standard);
+  /* 모서리는 오가는 그림이 아니라 이 틀이 잘라냅니다. 아래에서 두 그림의 반지름을
+     0 으로 두는 것과 짝입니다 — 자세한 이유는 그쪽에 적었습니다. */
+  border-radius: var(--_image-viewer-rounded);
+  overflow: clip;
+}
+
+::view-transition-old(viewer-photo),
+::view-transition-new(viewer-photo) {
+  /* 같은 그림이 겹쳐 있으므로 투명도를 건드리면 가운데에서 오히려 옅어집니다. */
+  animation: none;
+  mix-blend-mode: normal;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+/* 오가는 동안에는 사진 자체의 모서리를 없앱니다.
+   전환에 쓰이는 두 그림은 찍힌 그림이라, 반지름도 그림에 그려진 채로 함께 늘고
+   줄어듭니다. 917 폭에서 찍은 20 짜리 모서리를 353 으로 줄이면 8 이 되고, 반대로
+   키우면 52 가 됩니다 — 모서리가 커졌다 작아졌다 합니다.
+
+   그래서 그림에서는 빼고 위의 틀이 20 으로 잘라내게 둡니다. 틀은 그림이 아니라
+   상자라 크기가 변해도 반지름이 그대로입니다.
+
+   목록 쪽 사진에도 반지름을 적어두는 것은 이 클래스가 붙지 않은 평소를 위해서입니다.
+   버튼이 이미 잘라내고 있지만, 사진에도 같은 값이 있어야 전환이 끝나고 클래스가
+   빠지는 순간 모서리가 튀지 않습니다. */
+.image-viewer.is-morphing .image-viewer__frame img,
+.image-viewer.is-morphing .image-viewer__thumb img { border-radius: 0; }
+
+/* 나머지 화면(상단 바의 제목 ↔ 장수)은 짧게 교차시킵니다. */
+::view-transition-group(root) {
+  animation-duration: var(--_duration-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) { animation: none; }
+}

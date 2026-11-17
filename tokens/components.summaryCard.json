@@ -1,0 +1,20 @@
+{
+  "components": {
+    "summaryCard": {
+      "$description": "신청·결제 화면의 주문 요약. 무엇을, 언제, 얼마에 신청하는지를 한 장에 모읍니다.",
+      "width": { "$type": "dimension", "$value": "380px" },
+      "bg": { "$type": "color", "$value": "{semantic.colors.bg}" },
+      "border": { "$type": "color", "$value": "{semantic.colors.border}" },
+      "rounded": { "$type": "dimension", "$value": "{primitive.rounded.2xl}" },
+      "padding": { "$type": "dimension", "$value": "{semantic.spacing.500}" },
+      "gap": { "$type": "dimension", "$value": "{semantic.spacing.400}" },
+      "thumbnailSize": { "$type": "dimension", "$value": "108px" },
+      "thumbnailRounded": { "$type": "dimension", "$value": "{primitive.rounded.l}" },
+      "divider": { "$type": "color", "$value": "{semantic.colors.divider-low}" },
+      "guideIconSize": { "$type": "dimension", "$value": "16px" },
+      "guideFg": { "$type": "color", "$value": "{semantic.colors.fg-lower}" },
+      "optionBg": { "$type": "color", "$value": "{semantic.colors.bg-low}" },
+      "optionRounded": { "$type": "dimension", "$value": "{primitive.rounded.l}" }
+    }
+  }
+}

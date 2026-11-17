@@ -1,0 +1,157 @@
+<!doctype html>
+<!-- 마이 — 폰의 다섯째 탭.
+     넓은 화면에서는 같은 것이 GNB 의 메뉴 버튼 아래 판으로 열립니다(my-menu.js).
+     담기는 것은 한 벌이고, 담는 그릇만 폭에 따라 다릅니다. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>마이 — 감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/app-bar.css?v=1129f720">
+<style>
+  body {
+    margin: 0;
+    background: var(--colors-bg);
+    color: var(--colors-fg);
+    font-family: var(--_font-family-base);
+  }
+  /* 화면에는 안 보이지만 스크린리더는 읽는 텍스트 */
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<!-- 다른 화면과 같은 GNB 입니다. 폰에서는 로고와 로그인·알림만 남습니다
+     (gnb.css) — 이 화면의 나머지는 아래 목록이 다 말하고 있습니다. -->
+<header class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <a class="btn btn--ghost btn--medium" href="./meetups.html"><span class="btn__label">모임</span></a>
+        <a class="btn btn--ghost btn--medium" href="./matching.html"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <!-- 로그인하지 않았을 때만 남습니다. 로그인한 사람에게는 아래 목록이
+             누구인지 말하고 있어 my-menu.js 가 이 버튼을 지웁니다. -->
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <!-- 내 메뉴. GNB 가운데 줄의 메뉴가 서비스를 둘러보는 길이라면, 여기는
+             내 프로필·결제·설정처럼 나에게만 해당하는 것들이 섭니다(my-menu.js). -->
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="my-page">
+  <h1 class="sr-only">마이</h1>
+  <!-- 내용은 my-menu.js 가 그립니다 — 넓은 화면의 판과 같은 목록입니다. -->
+  <div class="my-page__list" data-my-page></div>
+</main>
+
+<!-- 아래로 읽어 내려가는 동안에는 물러납니다(auto-hide.js) — 모임 목록과 같습니다. -->
+<nav class="app-bar app-bar--fixed" data-auto-hide="down" aria-label="주요 메뉴">
+  <a class="app-bar__item" href="./index.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+    <span class="app-bar__label">홈</span>
+  </a>
+  <a class="app-bar__item" href="./meetups.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+    <span class="app-bar__label">탐색</span>
+  </a>
+  <a class="app-bar__item" href="./matching.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+    <span class="app-bar__label">매칭</span>
+  </a>
+  <a class="app-bar__item" href="#">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+    <span class="app-bar__label">추천</span>
+  </a>
+  <a class="app-bar__item is-active" href="./my.html" aria-current="page">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-myFilled"></use></svg>
+    <span class="app-bar__label">마이</span>
+  </a>
+</nav>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initAutoHide } = await import('./components/auto-hide.js?v=ef9c163a')
+  initAutoHide()
+  const { initAppBarPress } = await import('./components/app-bar.js?v=6deb1462')
+  initAppBarPress()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  const { initMyPage } = await import('./components/my-menu.js?v=fe953b87')
+  initMyPage()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>

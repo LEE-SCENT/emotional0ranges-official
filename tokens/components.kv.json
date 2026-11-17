@@ -1,0 +1,51 @@
+{
+  "components": {
+    "kv": {
+      "$description": "홈 최상단 키비주얼. 배경에 영상이 깔리고 그 위에 흰 텍스트와 CTA 가 올라갑니다.",
+      "rounded": {
+        "$type": "dimension",
+        "base": {
+          "$value": "{primitive.rounded.l}",
+          "$description": "~960"
+        },
+        "md": {
+          "$value": "{primitive.rounded.2xl}",
+          "$description": "961~"
+        }
+      },
+      "scrim": {
+        "$type": "color",
+        "$value": "{primitive.colors.seriousGray.alpha900.8}",
+        "$description": "⚠️ Figma 에 없습니다. 영상 위 흰 텍스트의 가독성을 위해 필요해 추가했습니다. 실제 서비스도 어두운 그라디언트를 깔고 있습니다."
+      },
+      "minHeight": {
+        "$type": "dimension",
+        "base": {
+          "$value": "534px",
+          "$description": "~440 Figma 13:4169(430) 기준 534."
+        },
+        "sm": {
+          "$value": "616px",
+          "$description": "441~960"
+        },
+        "md": {
+          "$value": "518px",
+          "$description": "961~"
+        }
+      },
+      "slide": {
+        "$description": "KV 가 여러 장일 때. 다음 장이 화면 오른쪽에 살짝 걸쳐 힌트로 보입니다.",
+        "gap": {
+          "$type": "dimension",
+          "$value": "{semantic.spacing.200}",
+          "$description": "장 사이 8px. Figma 13:4169 에서 KV1 오른쪽 410, KV2 왼쪽 418."
+        },
+        "scaleIdle": {
+          "$type": "number",
+          "$value": 0.882,
+          "$description": "현재가 아닌 장의 크기. Figma 344/390 = 471/534 = 0.882 로 가로세로가 같습니다."
+        }
+      }
+    }
+  }
+}

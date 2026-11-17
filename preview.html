@@ -1,0 +1,96 @@
+<!doctype html><meta charset="utf-8">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. 푸터의 사업자
+     등록번호·고객센터 번호가 그렇게 파란 밑줄로 바뀌어 꺼둡니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘. SVG 한 장으로 모든 크기를 감당합니다 — 크기별 PNG 를 따로 두면
+     하나만 바뀌어 탭마다 다른 그림이 뜨는 일이 생깁니다. -->
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 영문 전용 display 서체(display-en-*). Google Fonts 에서 받아옵니다.
+     선언만 담긴 CSS 라, 이 서체를 쓰는 글자가 화면에 없으면 폰트 파일은 받지 않습니다.
+     preconnect 는 그 CSS 를 읽고 나서야 시작될 연결을 미리 열어둡니다.
+
+     media=print 로 걸었다가 도착하면 all 로 바꿉니다. 스타일시트는 원래 첫 그림을
+     막는데, 남의 서버에서 오는 이 한 줄 때문에 우리 화면이 늦게 뜰 이유가 없습니다 —
+     화면에 쓰이는 글자는 어차피 Pretendard 이고, 이 서체는 늦게 와도 그때 바뀝니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap"></noscript>
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<style>
+  body { margin:0; padding:32px; background:var(--colors-white); color:var(--colors-serious-gray-900);
+         font-family:var(--_font-family-base); }
+  h2 { font:inherit; margin:32px 0 12px; color:var(--colors-serious-gray-600);
+       font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+  .icons { display:grid; grid-template-columns:repeat(8,1fr); gap:20px 8px; }
+  .cell { text-align:center; font-size:10px; color:var(--colors-serious-gray-600); }
+  .cell svg { display:block; margin:0 auto 6px; width:24px; height:24px; color:var(--colors-serious-gray-800); }
+  .orange svg { color:var(--colors-twist-orange-500); }
+  .swatches { display:flex; gap:0; }
+  .sw { flex:1; height:44px; }
+  .row { border-bottom:1px solid var(--colors-serious-gray-300); padding:6px 0; }
+  .row small { color:var(--colors-serious-gray-500); font-size:11px; }
+</style>
+<body>
+<div id="sprite"></div>
+<h2>Typography</h2>
+<div id="type"></div>
+<h2>Icons — currentColor 상속 확인</h2>
+<div class="icons" id="i1"></div>
+<h2>Icons — twistOrange 500</h2>
+<div class="icons orange" id="i2"></div>
+<h2>Badge — 회색 배경 위 (흰 링 확인용)</h2>
+<div style="display:flex;align-items:center;gap:24px;background:var(--_colors-serious-gray-400);padding:16px;width:max-content;border-radius:var(--_rounded-m)">
+  <span class="badge"></span><small style="font-size:11px">m · 8+1</small>
+  <span class="badge badge--l"></span><small style="font-size:11px">l · 10+2</small>
+</div>
+<h2>Semantic colors — 공개 토큰만 사용</h2>
+<div class="icons" id="sem"></div>
+<h2>Spacing — calc(var(--dimension) × n)</h2>
+<div id="space"></div>
+<h2>twistOrange 50 → 900</h2>
+<div class="swatches" id="c1"></div>
+<h2>seriousGray 50 → 900</h2>
+<div class="swatches" id="c2"></div>
+<script type="module">
+const sprite = await (await fetch("./build/icons.svg")).text()
+document.getElementById('sprite').innerHTML = sprite
+const names = [...sprite.matchAll(/id="icon-([^"]+)"/g)].map(m => m[1])
+for (const id of ['i1','i2']) {
+  document.getElementById(id).innerHTML = names.map(n =>
+    `<div class="cell"><svg><use href="#icon-${n}"></use></svg>${n}</div>`).join('')
+}
+// build/tokens.css 가 만든 .typography-* 를 그대로 훑습니다. 목록을 손으로 적어두면
+// 스타일이 늘거나 이름이 바뀔 때마다 여기가 먼저 낡습니다 — 실제로 그랬습니다.
+const TOKENS = [...document.styleSheets]
+  .flatMap(sheet => { try { return [...sheet.cssRules] } catch { return [] } })
+  .map(rule => rule.selectorText?.match(/^\.typography-([\w-]+)$/)?.[1])
+  .filter(Boolean)
+// 영문 전용 서체는 한글 글리프가 없어 그 줄만 영문으로 보여줍니다.
+document.getElementById('type').innerHTML = TOKENS.map(t =>
+  `<div class="row"><span class="typography-${t}">${t.includes('-en-') ? 'Emotional Oranges Ag 123' : '디자인 시스템 Ag 123'}</span> <small>${t}</small></div>`).join('')
+const SEM = ['bg','bg-low','bg-disabled','bg-transparent','bg-critical','bg-on',
+  'fg','fg-low','fg-lower','fg-lowest','fg-disabled','fg-on','fg-success','fg-critical']
+document.getElementById('sem').innerHTML = SEM.map(n =>
+  `<div class="cell"><div data-sem="${n}" style="height:40px;border:1px solid var(--colors-fg-disabled);background:var(--colors-${n})"></div>${n}</div>`).join('')
+const SPACES = [50,100,150,200,250,300,400,500,600,700,800,900,1000,1200,1500,1800,2000,2200,2400,3000,3200,4000,4500]
+document.getElementById('space').innerHTML = SPACES.map(n =>
+  `<div class="row" style="display:flex;align-items:center;gap:12px">
+     <small style="width:56px">${n}</small>
+     <div data-sp="${n}" style="height:10px;background:var(--colors-twist-orange-500);width:var(--spacing-${n})"></div>
+   </div>`).join('')
+for (const [id, ramp] of [['c1','twist-orange'],['c2','serious-gray']]) {
+  document.getElementById(id).innerHTML = [50,100,200,300,400,500,600,700,800,900]
+    .map(s => `<div class="sw" style="background:var(--colors-${ramp}-${s})"></div>`).join('')
+}
+</script>

@@ -1,0 +1,74 @@
+{
+  "components": {
+    "sheet": {
+      "$description": "화면 아래에서 올라오는 시트. 상세 화면에서 신청하기를 누르면 일정을 고르는 목록이 이 안에 뜹니다.",
+      "backdrop": {
+        "$type": "color",
+        "$value": "#00000040",
+        "$description": "⚠️ Figma 에 변수로 없습니다 (rgba(0,0,0,0.25)). 뒤 화면이 비쳐야 어디에서 열린 것인지 알 수 있어 완전히 가리지 않습니다."
+      },
+      "bg": { "$type": "color", "$value": "{semantic.colors.bg}" },
+      "rounded": {
+        "$type": "dimension",
+        "$value": "{primitive.rounded.2xl}",
+        "$description": "위쪽 두 모서리만. 아래는 화면 끝에 닿아 있어 둥글릴 자리가 없습니다."
+      },
+      "modalWidth": {
+        "$type": "dimension",
+        "$value": "600px",
+        "$description": "넓은 화면에서 모달의 폭. 안쪽 24 를 빼면 카드가 552 로, 프레임의 값과 같습니다."
+      },
+      "modalMargin": {
+        "$type": "dimension",
+        "$value": "{semantic.spacing.800}",
+        "$description": "모달 위아래로 남기는 자리. 화면 높이와 상관없이 늘 같습니다 — 큰 화면에서만 여백이 벌어지면 같은 모달이 화면마다 다른 크기로 보입니다. 모달 높이는 화면에서 이 값을 위아래로 뺀 만큼입니다."
+      },
+      "modalHeaderHeight": {
+        "$type": "dimension",
+        "$value": "76px",
+        "$description": "제목(28)과 닫기 버튼(40)이 들어가는 줄."
+      },
+      "modalPaddingInline": {
+        "$type": "dimension",
+        "$value": "{semantic.spacing.600}"
+      },
+      "maxWidth": {
+        "$type": "dimension",
+        "$value": "480px",
+        "$description": "⚠️ Figma 에 변수로 없습니다. 좁은 화면 프레임(430)에는 필요 없던 값인데, 신청·결제 화면에서는 넓은 화면에서도 시트를 열어 상한이 필요해졌습니다. 화면 폭을 다 쓰면 카드 한 줄의 정보가 양 끝으로 흩어집니다."
+      },
+      "maxHeight": {
+        "$type": "dimension",
+        "$value": "76dvh",
+        "$description": "⚠️ Figma 에 변수로 없습니다. 932 프레임에서 시트가 706 이라 그 비율(75.8%)을 옮겼습니다. 뒤 화면이 위쪽에 남아 있어야 시트를 닫고 돌아갈 곳이 보입니다. dvh 인 것은 모바일 주소창이 접혔다 펴져도 시트가 화면을 넘지 않게 하기 위해서입니다."
+      },
+      "paddingBlock": {
+        "$type": "dimension",
+        "$value": "{semantic.spacing.600}",
+        "$description": "위쪽 24. 아래는 12 로 buttonPaddingBlock 을 씁니다."
+      },
+      "paddingBlockEnd": { "$type": "dimension", "$value": "{semantic.spacing.300}" },
+      "paddingInline": { "$type": "dimension", "$value": "{semantic.spacing.500}" },
+      "gap": {
+        "$type": "dimension",
+        "$value": "{semantic.spacing.600}",
+        "$description": "목록과 아래 버튼 사이."
+      },
+      "modalShadow": {
+        "$type": "shadow",
+        "$value": "0 12px 32px #0000001f",
+        "$description": "⚠️ Figma 에 없습니다 — 모달 디자인이 아직 나오기 전이라 임시로 정했습니다. 아래에서 올라오는 시트는 위쪽으로만 그림자를 드리우지만, 화면 가운데 뜬 모달은 사방에 떠 있어야 하므로 아래로 짙게 깔았습니다."
+      },
+      "scrollLine": {
+        "$type": "color",
+        "$value": "#0000000d",
+        "$description": "머리글 아래 · 버튼 위에 그어지는 실선. 그쪽으로 아직 내용이 남아 있을 때만 나옵니다. bottomCTA 가 inset 0 1px 0 rgba(0,0,0,0.05) 로 그려져 있어 같은 값을 씁니다."
+      },
+      "shadow": {
+        "$type": "shadow",
+        "$value": "0 -4px 12px #0000001a",
+        "$description": "⚠️ Figma 에 변수로 없습니다 (drop-shadow 0 -4px 12px rgba(0,0,0,0.1)). 시트가 뒤 화면 위로 떠 있다는 것을 위쪽 모서리에서 알립니다."
+      }
+    }
+  }
+}

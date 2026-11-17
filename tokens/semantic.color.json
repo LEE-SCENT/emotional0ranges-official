@@ -1,0 +1,43 @@
+{
+  "semantic": {
+    "colors": {
+      "$type": "color",
+      "$description": "화면 작업에서 쓰는 유일한 컬러 레이어. bg-* 는 배경, fg-* 는 전경(텍스트·아이콘), border 는 테두리, divider 는 구분선이며 접미사 없는 것이 기본값입니다. low/lower/lowest 는 대비가 낮아지는 순서, -contrast 는 반전 배경 위에 올릴 때 씁니다.",
+
+      "bg":             { "$value": "{primitive.colors.white}" },
+      "bg-low":         { "$value": "{primitive.colors.seriousGray.100}" },
+      "bg-disabled":    {
+        "$value": "{primitive.colors.seriousGray.100}",
+        "$description": "지금 쓸 수 없는 것의 바탕. Figma 변수 semantic/bg-disabled(#F8F6F5)이며 현재 bg-low 와 값이 같습니다 — 쓸 수 없다는 것은 바탕이 아니라 글자색(fg-disabled · fg-lowest)이 말합니다. 역할이 달라 토큰은 따로 둡니다."
+      },
+      "bg-transparent": { "$value": "{primitive.colors.seriousGray.alpha900.8}" },
+      "bg-brand":       { "$value": "{primitive.colors.twistOrange.500}" },
+      "bg-contrast":    { "$value": "{primitive.colors.black}" },
+      "bg-critical":    { "$value": "{primitive.colors.accentRed.50}" },
+
+      "fg":             { "$value": "{primitive.colors.black}" },
+      "fg-low":         { "$value": "{primitive.colors.seriousGray.700}" },
+      "fg-lower":       { "$value": "{primitive.colors.seriousGray.600}" },
+      "fg-lowest":      { "$value": "{primitive.colors.seriousGray.500}" },
+      "fg-disabled":    { "$value": "{primitive.colors.seriousGray.400}" },
+      "fg-brand":       { "$value": "{primitive.colors.twistOrange.500}" },
+      "fg-contrast":    { "$value": "{primitive.colors.white}" },
+      "fg-success":     { "$value": "{primitive.colors.accentGreen.400}" },
+      "fg-critical":    { "$value": "{primitive.colors.accentRed.500}" },
+
+      "border":         { "$value": "{primitive.colors.seriousGray.300}" },
+      "border-active":  {
+        "$value": "{primitive.colors.seriousGray.900}",
+        "$description": "고른 것의 테두리. 프로필 폼의 선택지처럼 여럿 가운데 지금 켜진 것을 테두리 굵기와 이 색으로 말합니다. Figma 변수 semantic/border-active(#272625) 입니다."
+      },
+      "divider":        {
+        "$value": "{primitive.colors.seriousGray.300}",
+        "$description": "구획을 나누는 선. 현재 border 와 값이 같지만 역할이 달라 별도 토큰입니다 — 테두리와 구분선의 농도를 따로 조정할 때 여기만 바꾸면 됩니다."
+      },
+      "divider-low":    {
+        "$value": "{primitive.colors.seriousGray.200}",
+        "$description": "상자 안에서 항목을 가르는 선. divider 보다 한 단계 옅습니다 — 상자의 테두리와 같은 농도로 그으면 카드가 여러 장으로 쪼개져 보입니다."
+      }
+    }
+  }
+}

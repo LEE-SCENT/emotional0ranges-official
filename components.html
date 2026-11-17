@@ -1,0 +1,962 @@
+<!doctype html>
+<meta charset="utf-8"><title>Components</title>
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. 푸터의 사업자
+     등록번호·고객센터 번호가 그렇게 파란 밑줄로 바뀌어 꺼둡니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘. SVG 한 장으로 모든 크기를 감당합니다 — 크기별 PNG 를 따로 두면
+     하나만 바뀌어 탭마다 다른 그림이 뜨는 일이 생깁니다. -->
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 프로필 카드의 한마디에만 쓰는 명조입니다. 조각으로 나뉘어 있어 쓰인 글자만 받습니다. -->
+<link rel="stylesheet" href="./fonts/nanum-myeongjo/nanum-myeongjo.css?v=481777f6">
+<!-- 영문 전용 display 서체(display-en-*). Google Fonts 에서 받아옵니다.
+     선언만 담긴 CSS 라, 이 서체를 쓰는 글자가 화면에 없으면 폰트 파일은 받지 않습니다.
+     preconnect 는 그 CSS 를 읽고 나서야 시작될 연결을 미리 열어둡니다.
+
+     media=print 로 걸었다가 도착하면 all 로 바꿉니다. 스타일시트는 원래 첫 그림을
+     막는데, 남의 서버에서 오는 이 한 줄 때문에 우리 화면이 늦게 뜰 이유가 없습니다 —
+     화면에 쓰이는 글자는 어차피 Pretendard 이고, 이 서체는 늦게 와도 그때 바뀝니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap"></noscript>
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/button-group.css?v=99900e0c">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/footer.css?v=090dd8fc">
+<link rel="stylesheet" href="./components/tag.css?v=fef5c195">
+<link rel="stylesheet" href="./components/product-card.css?v=85b7c185">
+<link rel="stylesheet" href="./components/app-bar.css?v=1129f720">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/participants.css?v=3d11ed3c">
+<link rel="stylesheet" href="./components/checkbox.css?v=44baaa09">
+<link rel="stylesheet" href="./components/tabs.css?v=a962487a">
+<link rel="stylesheet" href="./components/field.css?v=30705fc7">
+<link rel="stylesheet" href="./components/choice.css?v=14663585">
+<link rel="stylesheet" href="./components/verified-banner.css?v=34c301e8">
+<link rel="stylesheet" href="./components/profile-card.css?v=351d3a47">
+<link rel="stylesheet" href="./components/verify.css?v=9ecc570b">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<style>
+  body { margin:0; padding:24px; background:var(--colors-bg); color:var(--colors-fg);
+         font-family:var(--_font-family-base); }
+  h2 { font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+       color:var(--colors-fg-lower); margin:28px 0 10px; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  .onbg { background:var(--colors-bg-contrast); padding:16px; border-radius:var(--_rounded-m); }
+  .blurbg { background:linear-gradient(120deg,#c2410c,#f59e0b); padding:16px; border-radius:var(--_rounded-m); }
+  small { font-size:11px; color:var(--colors-fg-lowest); }
+  /* ---- 코드 복사 ---------------------------------------------------------
+     구획마다 그 아래에 접힌 코드가 붙습니다(아래 스크립트가 붙입니다). 화면에 그려진
+     것을 그대로 읽어 내므로, 코드와 그림이 따로 놀 수 없습니다. */
+  h2 { display:flex; align-items:center; gap:8px; }
+  h2 .snippet__copy { margin-inline-start:auto; text-transform:none; letter-spacing:0; }
+  .snippet { margin:6px 0 14px; border-radius:var(--_rounded-m); background:var(--colors-bg-low); }
+  .snippet summary { padding:8px 12px; font-size:12px; color:var(--colors-fg-low); cursor:pointer; user-select:none; }
+  .snippet__needs { margin:0; padding:0 12px 8px; font-size:11px; line-height:1.6; color:var(--colors-fg-lower); }
+  .snippet__needs code { color:var(--colors-fg-low); }
+  .snippet pre { margin:0; padding:12px; max-height:360px; overflow:auto; border-top:1px solid var(--colors-divider);
+                 font:12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--colors-fg); tab-size:2; }
+  .col { display:flex; flex-direction:column; gap:16px; max-width:772px; margin-bottom:10px; }
+  .sr-only { position:absolute; inline-size:1px; block-size:1px; margin:-1px; padding:0;
+             overflow:hidden; white-space:nowrap; clip-path:inset(50%); }
+</style>
+<div id="sprite" hidden></div>
+<h2>Breakpoint — 창 폭을 줄여보세요</h2>
+<div style="background:var(--colors-bg-low);padding:8px 0;border-radius:var(--_rounded-m)">
+  <div class="container" id="bp-probe" style="background:var(--colors-bg);border:1px dashed var(--colors-border);padding-block:12px;text-align:center;font-size:12px"></div>
+</div>
+<h2>Footer</h2>
+<div id="footer-host"></div>
+<h2>GNB — 창 폭에 따라 small / medium / large</h2>
+<div id="gnb-host" style="border:1px solid var(--colors-border);border-radius:var(--_rounded-m);overflow:hidden"></div>
+<h2>Logo — original / white / currentColor</h2>
+<div class="row" style="gap:24px">
+  <img src="./build/logo/original.svg" alt="emotional oranges" height="40">
+  <span style="background:var(--colors-bg-contrast);padding:12px 16px;border-radius:var(--_rounded-m);display:inline-flex">
+    <img src="./build/logo/white.svg" alt="emotional oranges" height="40">
+  </span>
+  <span id="logo-inline" style="color:var(--colors-fg-brand)"></span>
+</div>
+<h2>Font — weight 400 / 500 / 600 구분 확인</h2>
+<div id="wt" style="display:flex;flex-direction:column;gap:2px"></div>
+<h2>Button — 기본형 (suffixIcon·hasBadge 없음)</h2>
+<div class="row" id="r0"></div>
+<h2>Button — suffixIcon</h2>
+<div class="row" id="r1"></div>
+<h2>Button — isOn (반전 배경)</h2>
+<div class="row onbg" id="r2"></div>
+<h2>Button — blur</h2>
+<div class="row blurbg" id="r3"></div>
+<h2>Button — iconOnly 기본형 (badge 없음)</h2>
+<div class="row" id="r4"></div>
+<h2>Button — iconOnly + badge</h2>
+<div class="row" id="r4b"></div>
+<h2>SegmentedControl — 높이 40 · 마지막 항목은 비활성</h2>
+<div class="row" id="r5"></div>
+<h2>Tooltip — bottom / top × 닫기버튼</h2>
+<div class="row" id="r6" style="gap:32px;row-gap:28px;padding:20px 0"></div>
+<h2>Toast — 저장 / 해제 / 오류 / 두 줄</h2>
+<div class="row" style="flex-direction:column;align-items:flex-start">
+  <div class="toast toast--accent">
+    <svg class="toast__icon" aria-hidden="true"><use href="#icon-favoriteFilled"></use></svg>
+    <p class="toast__label">찜한 모임에 저장했어요</p>
+  </div>
+  <div class="toast">
+    <p class="toast__label">찜을 해제했어요</p>
+  </div>
+  <div class="toast toast--success">
+    <svg class="toast__icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+    <p class="toast__label">기본 프로필을 저장했어요</p>
+  </div>
+  <div class="toast toast--critical">
+    <svg class="toast__icon" aria-hidden="true"><use href="#icon-error"></use></svg>
+    <p class="toast__label">빈자리 알림 신청에 실패했어요. 잠시 후 다시 시도해 주세요.</p>
+  </div>
+  <div class="toast toast--critical">
+    <svg class="toast__icon" aria-hidden="true"><use href="#icon-error"></use></svg>
+    <p class="toast__label">빈자리 알림 신청이 종료되었어요. 다른 일정을 확인해 주세요.</p>
+  </div>
+  <div class="toast">
+    <p class="toast__label">문구는 최대 두 줄입니다. 세 줄이 되면 다 읽기 전에 띠가 사라져 잘라냅니다</p>
+  </div>
+</div>
+<small>화면에서는 toast.js 가 아래에 고정해 띄웁니다 — PC 는 하단 가운데에서 32, 모바일은 신청 버튼 위 12. 여기서는 흐름 안에 그대로 놓고 봅니다.</small>
+
+<h2>CookieConsent — 거부 / 허용 (같은 폭)</h2>
+<div class="row" style="flex-direction:column;align-items:stretch">
+  <section class="cookie-consent" aria-labelledby="cookie-consent-demo-title" style="position:static;animation:none;margin-inline:0">
+    <div class="cookie-consent__text">
+      <h2 id="cookie-consent-demo-title">광고 쿠키를 허용할까요?</h2>
+      <p>맞춤 광고와 광고 효과 측정에 쿠키를 사용해요.
+        거부해도 서비스는 그대로 이용할 수 있어요.
+        <a href="https://emotional0ranges.com/privacy" target="_blank" rel="noopener">자세히 보기</a></p>
+    </div>
+    <div class="cookie-consent__actions">
+      <button class="btn btn--outlined btn--medium" type="button"><span class="btn__label">거부</span></button>
+      <button class="btn btn--filled btn--medium" type="button"><span class="btn__label">허용</span></button>
+    </div>
+  </section>
+  <div><button class="btn btn--outlined btn--medium" type="button" data-cookie-consent-open><span class="btn__label">카드 띄우기</span></button></div>
+</div>
+<small>화면에서는 cookie-consent.js 가 아래에 고정해 띄우고, 이미 고른 사람에게는 띄우지 않습니다. 넓은 화면은 오른쪽 아래 구석(폭 640, 버튼은 글 옆), 960 이하는 아래 가운데에 세로로 쌓입니다. 고른 값은 localStorage 'cookie-consent' 에 남습니다.</small>
+
+<h2>Participant — 연령대 · 직업군 (남 / 여 / 아직 없음)</h2>
+<div class="row" style="align-items:flex-start">
+  <ul class="participants__row" style="inline-size:268px">
+    <li class="participant participant--m"><span class="participant__content"><span class="participant__age">90년대 중반</span><span class="participant__sep"></span><span class="participant__job">의료계</span></span></li>
+    <li class="participant participant--m"><span class="participant__content"><span class="participant__age">80년대 후반</span><span class="participant__sep"></span><span class="participant__job">IT·개발직</span></span></li>
+  </ul>
+  <ul class="participants__row" style="inline-size:268px">
+    <li class="participant participant--f"><span class="participant__content"><span class="participant__age">90년대 중반</span><span class="participant__sep"></span><span class="participant__job">교사</span></span></li>
+    <li class="participant participant--f"><span class="participant__content"><span class="participant__age">90년대 중반</span><span class="participant__sep"></span><span class="participant__job">기획·마케팅</span></span></li>
+  </ul>
+  <p class="participants__empty" style="inline-size:268px">
+    <svg aria-hidden="true"><use href="#icon-infoCircle"></use></svg>
+    <span>아직 참여자가 없어요</span>
+  </p>
+</div>
+<small>앞의 점은 성별입니다. 점만으로 말하지 않도록 창에서는 칸 제목(남성 6 / 여성 3)이 위에 함께 섭니다.</small>
+
+<h2>ButtonGroup — vertical</h2>
+<div class="row" id="r7"></div>
+<h2>ButtonGroup — horizontal</h2>
+<div class="row" id="r8"></div>
+<h2>Card — product / category / promotion</h2>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+  <article class="product-card" style="inline-size:398px">
+    <div class="product-card__media">
+      <img src="./images/meetup-couple.jpg" alt="">
+      <div class="product-card__tags">
+        <span class="tag">8월 25일 (화) 저녁 7시</span>
+        <span class="tag tag--accent-pri">남성 2자리 남음</span>
+        <span class="tag tag--accent-sec">여성 마감</span>
+      </div>
+      <p class="product-card__status">
+        <span class="is-remaining">남성 2자리 남음</span>
+        <span class="is-closed">여성 마감</span>
+      </p>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">상품명</h3>
+      <p class="product-card__desc">서울 강남</p>
+      <p class="product-card__price"><b>할인가</b> 33,000원~</p>
+    </div>
+  </article>
+
+  <article class="product-card product-card--category" style="inline-size:198px">
+    <div class="product-card__media"><img src="./images/meetup-lamp.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">상품명</h3>
+      <p class="product-card__desc">모임 3개</p>
+    </div>
+  </article>
+</div>
+
+<h2>AppBar — 선택된 탭만 채워진 아이콘 + 브랜드 색</h2>
+<div style="display:flex;flex-direction:column;gap:20px;max-inline-size:390px">
+  <nav class="app-bar" aria-label="주요 메뉴">
+    <a class="app-bar__item is-active" href="#" aria-current="page">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-homeFilled"></use></svg>
+      <span class="app-bar__label">홈</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+      <span class="app-bar__label">탐색</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+      <span class="app-bar__label">매칭</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+      <span class="app-bar__label">추천</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+      <span class="app-bar__label">마이</span>
+    </a>
+  </nav>
+  <nav class="app-bar" aria-label="주요 메뉴">
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+      <span class="app-bar__label">홈</span>
+    </a>
+    <a class="app-bar__item is-active" href="#" aria-current="page">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorerFilled"></use></svg>
+      <span class="app-bar__label">탐색</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+      <span class="app-bar__label">매칭</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+      <span class="app-bar__label">추천</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+      <span class="app-bar__label">마이</span>
+    </a>
+  </nav>
+  <nav class="app-bar" aria-label="주요 메뉴">
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+      <span class="app-bar__label">홈</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+      <span class="app-bar__label">탐색</span>
+    </a>
+    <a class="app-bar__item is-active" href="#" aria-current="page">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-matchFilled"></use></svg>
+      <span class="app-bar__label">매칭</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+      <span class="app-bar__label">추천</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+      <span class="app-bar__label">마이</span>
+    </a>
+  </nav>
+  <nav class="app-bar" aria-label="주요 메뉴">
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+      <span class="app-bar__label">홈</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+      <span class="app-bar__label">탐색</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+      <span class="app-bar__label">매칭</span>
+    </a>
+    <a class="app-bar__item is-active" href="#" aria-current="page">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStarFilled"></use></svg>
+      <span class="app-bar__label">추천</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+      <span class="app-bar__label">마이</span>
+    </a>
+  </nav>
+  <nav class="app-bar" aria-label="주요 메뉴">
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+      <span class="app-bar__label">홈</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+      <span class="app-bar__label">탐색</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+      <span class="app-bar__label">매칭</span>
+    </a>
+    <a class="app-bar__item" href="#">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+      <span class="app-bar__label">추천</span>
+    </a>
+    <a class="app-bar__item is-active" href="#" aria-current="page">
+      <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-myFilled"></use></svg>
+      <span class="app-bar__label">마이</span>
+    </a>
+  </nav>
+</div>
+
+<h2>Card — 태그 노출 조건 (카드 폭 312, 가장 좁은 경우)</h2>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/meetup-couple.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">8월 25일 (화) 저녁 7시</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">3자리 이상 — 일정 태그만</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/meetup-lamp.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">8월 25일 (화) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남성 2자리 남음</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">한 성별 1~2자리</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/meetup-record.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">8월 25일 (화) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남성 1자리 남음</span>
+          <span class="tag tag--accent-sec">여성 마감</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">임박 + 마감 — 각각 분리</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/detail-photo-2.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">8월 25일 (화) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남성 1자리 남음</span>
+          <span class="tag tag--accent-pri">여성 2자리 남음</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">둘 다 임박 · 수가 다름</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/detail-photo-3.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">8월 25일 (화) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남·여 각 2자리 남음</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">둘 다 임박 · 수가 같음 — 한 장으로</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/promo-tile-2.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag">모든 일정 마감</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">신청 가능한 일정 없음</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+  <article class="product-card" style="inline-size:312px">
+    <div class="product-card__media">
+      <img src="./images/promo-main.jpg" alt="">
+      <div class="product-card__tags">
+          <span class="tag tag--black"><svg aria-hidden="true"><use href="#icon-memberBlack"></use></svg>블랙회원 전용</span>
+          <span class="tag">9월 6일 (일) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남성 1자리 남음</span>
+          <span class="tag tag--accent-sec">여성 마감</span>
+      </div>
+    </div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">전용 상품 — 최대 조합 4개</h3>
+      <p class="product-card__desc">서울 강남 · 일정 5개</p>
+      <p class="product-card__price">42,000원~</p>
+    </div>
+  </article>
+</div>
+
+<h2>Card — category 그룹 (medium 198 / small 108 · 넘치면 가로 스크롤)</h2>
+<div class="product-card-group product-card-group--category">
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/meetup-lamp.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">와인 클래스</h3>
+      <p class="product-card__desc">모임 3개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/meetup-couple.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">브런치 모임</h3>
+      <p class="product-card__desc">모임 5개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/meetup-record.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">음악 감상</h3>
+      <p class="product-card__desc">모임 2개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/promo-tile-1.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">전시 관람</h3>
+      <p class="product-card__desc">모임 4개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/promo-tile-2.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">북토크</h3>
+      <p class="product-card__desc">모임 6개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/promo-tile-3.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">러닝 크루</h3>
+      <p class="product-card__desc">모임 3개</p>
+    </div>
+  </article>
+  <article class="product-card product-card--category">
+    <div class="product-card__media"><img src="./images/promo-tile-5.jpg" alt=""></div>
+    <div class="product-card__info">
+      <h3 class="product-card__title">보드게임</h3>
+      <p class="product-card__desc">모임 7개</p>
+    </div>
+  </article>
+</div>
+
+<h2>Card — 목록 끝의 더보기 (썸네일과 같은 높이 · 최소 폭 108)</h2>
+<div class="product-card-section">
+  <div class="product-card-group">
+    <article class="product-card">
+      <div class="product-card__media">
+        <img src="./images/meetup-couple.jpg" alt="">
+        <div class="product-card__tags"><span class="tag">8월 25일 (화) 저녁 7시</span></div>
+      </div>
+      <div class="product-card__info">
+        <h3 class="product-card__title">목록의 마지막 카드</h3>
+        <p class="product-card__desc">서울 강남 · 일정 5개</p>
+        <p class="product-card__price">42,000원~</p>
+      </div>
+    </article>
+    <a class="product-card-more" href="#">
+      <span class="btn btn--blur btn--medium btn--icon-only">
+        <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+      </span>
+      <span>더보기</span>
+    </a>
+  </div>
+</div>
+<small>높이는 옆 카드의 썸네일에서 옵니다 — 카드 폭에서 나온 값이라 컨테이너 쿼리로 잽니다.</small>
+
+<h2>Card — promotion · 사진 7장 (메인 포함) → 더보기 노출</h2>
+<article class="product-card product-card--promotion is-locked">
+  <div class="product-card__media">
+    <div class="product-card__main"><img src="./images/promo-main.jpg" alt=""></div>
+    <div class="product-card__tiles">
+        <div class="product-card__tile"><img src="./images/promo-tile-1.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-2.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-3.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-4.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-5.jpg" alt=""></div>
+      <a class="product-card__tile product-card__tile--more" href="#">
+        <img src="./images/promo-tile-4.jpg" alt="">
+        <span class="product-card__more-label">
+          <svg aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+          더보기
+        </span>
+      </a>
+    </div>
+    <div class="product-card__tags">
+      <span class="tag tag--black">
+        <svg aria-hidden="true"><use href="#icon-memberBlack"></use></svg>
+        블랙회원 전용
+      </span>
+      <span class="tag">9월 6일 (일) 저녁 7시</span>
+      <span class="tag tag--accent-pri">남성 2자리 남음</span>
+    </div>
+  </div>
+  <div class="product-card__info">
+    <h3 class="product-card__title">상품명</h3>
+    <p class="product-card__desc">서울 강남</p>
+    <p class="product-card__price"><svg class="product-card__lock" aria-hidden="true"><use href="#icon-lockFilled"></use></svg>로그인 후 가격 확인</p>
+  </div>
+</article>
+
+<h2>Card — promotion · 사진 6장 → 더보기 없음 (마지막 칸은 빔)</h2>
+<article class="product-card product-card--promotion">
+  <div class="product-card__media">
+    <div class="product-card__main"><img src="./images/promo-main.jpg" alt=""></div>
+    <div class="product-card__tiles">
+      <div class="product-card__tile"><img src="./images/promo-tile-1.jpg" alt=""></div>
+      <div class="product-card__tile"><img src="./images/promo-tile-2.jpg" alt=""></div>
+      <div class="product-card__tile"><img src="./images/promo-tile-3.jpg" alt=""></div>
+      <div class="product-card__tile"><img src="./images/promo-tile-4.jpg" alt=""></div>
+      <div class="product-card__tile"><img src="./images/promo-tile-5.jpg" alt=""></div>
+    </div>
+    <div class="product-card__tags">
+      <span class="tag">9월 6일 (일) 저녁 7시</span>
+    </div>
+  </div>
+  <div class="product-card__info">
+    <h3 class="product-card__title">상품명</h3>
+    <p class="product-card__desc">서울 강남</p>
+    <p class="product-card__price">59,000원~</p>
+  </div>
+</article>
+
+
+<h2>Field — 기본 / 값 있음 / 아이콘 / 읽기 전용 / 비활성</h2>
+<div class="col">
+  <div class="field">
+    <label class="field__label" for="demo-f1">학교</label>
+    <div class="text-field"><input id="demo-f1" type="text" placeholder="학교명 입력"></div>
+  </div>
+  <div class="field">
+    <label class="field__label" for="demo-f2">학교<span class="field__required" aria-hidden="true"></span></label>
+    <div class="text-field"><input id="demo-f2" type="text" value="연세대학교 · 신촌캠퍼스"></div>
+    <p class="field__help">이름표 옆 점은 필수 표시(.field__required), 이 줄은 도움말(.field__help)입니다</p>
+  </div>
+  <div class="field">
+    <label class="field__label" for="demo-f3">직업</label>
+    <div class="text-field">
+      <svg class="text-field__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+      <input id="demo-f3" type="search" placeholder="직업 검색">
+    </div>
+  </div>
+  <div class="field">
+    <label class="field__label" for="demo-f4">이름 — 읽기 전용</label>
+    <div class="text-field text-field--readonly"><input id="demo-f4" type="text" value="김땡땡" readonly></div>
+  </div>
+  <div class="field">
+    <label class="field__label" for="demo-f5">회사 — 비활성</label>
+    <div class="text-field"><input id="demo-f5" type="text" value="MUSINSA" disabled></div>
+  </div>
+</div>
+<small>읽기 전용은 바탕이 기본(bg-low)이고 글자만 fg-low, 비활성은 바탕이 bg-disabled(지금은 bg-low 와 같은 값)이고 글자가 fg-lowest 입니다. 칸을 눌러 초점을 주면 흰 바탕 + border-active 1px 이 됩니다.</small>
+
+<h2>Field — select (기본 / 고르기 전 / 비활성)</h2>
+<div class="col">
+  <div class="field-row">
+    <div class="text-field text-field--select"><select aria-label="시·도"><option>서울</option><option>경기</option></select><svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg></div>
+    <div class="text-field text-field--select"><select aria-label="대분류"><option value="">대분류</option><option>IT/개발/기획</option></select><svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg></div>
+    <div class="text-field text-field--select"><select aria-label="구" disabled><option>강남구</option></select><svg aria-hidden="true"><use href="#icon-chevronDown"></use></svg></div>
+  </div>
+</div>
+
+<h2>Field — 기간 / 날짜 / 파일 / 긴 글</h2>
+<div class="col">
+  <div class="field-row">
+    <div class="text-field text-field--period">
+      <svg class="text-field__icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+      <label class="text-field__month"><span data-month-text>2022년 1월</span><input type="month" value="2022-01" aria-label="시작"></label>
+      <span aria-hidden="true">~</span>
+      <label class="text-field__month"><span data-month-text>2022년 3월</span><input type="month" value="2022-03" aria-label="끝"></label>
+    </div>
+    <div class="text-field">
+      <svg class="text-field__icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+      <label class="text-field__month text-field__date"><span>2026년 9월 18일</span><input type="date" value="2026-09-18" aria-label="서류 발급일"></label>
+    </div>
+  </div>
+  <div class="file-field">
+    <button class="btn btn--outlined btn--medium" type="button"><span class="btn__label">파일 선택</span></button>
+  </div>
+  <div class="file-field">
+    <div class="text-field text-field--readonly">
+      <span class="file-field__name">졸업증명서_김땡땡.pdf</span>
+      <button class="file-field__clear" type="button" aria-label="파일 지우기"><svg aria-hidden="true"><use href="#icon-cancelCircleFilled"></use></svg></button>
+    </div>
+    <button class="btn btn--outlined btn--medium" type="button"><span class="btn__label">파일 변경</span></button>
+  </div>
+  <div class="field">
+    <div class="text-field text-field--area" style="min-block-size:120px"><textarea maxlength="100" aria-label="한마디">낯은 조금 가리지만 친해지면 장난도 많이 쳐요.</textarea></div>
+    <p class="field__count"><b>26</b>/100</p>
+  </div>
+</div>
+<small>파일 칸은 고르기 전(버튼 하나)과 후(파일 이름 + 바꾸기)입니다. 여기서는 모습만 놓았고, 실제 동작은 아래 Verify 창에서 볼 수 있습니다. 긴 글 칸의 실제 높이는 320 입니다.</small>
+
+<h2>Choice — 기본 / 고름 / 잠김 (하나만 · 여럿)</h2>
+<div class="col">
+  <div class="choice-group">
+    <label class="choice"><input type="radio" name="demo-c1" value="없음" checked><span>없음</span></label><label class="choice"><input type="radio" name="demo-c1" value="혼인신고 경험 있음"><span>혼인신고 경험 있음</span></label>
+    <label class="checkbox-label"><span class="checkbox"><input type="checkbox"><span class="checkbox__box" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span></span>사실혼 경험 있음</label>
+  </div>
+  <div class="choice-group choice-group--cols-4">
+    <label class="choice"><input type="checkbox" name="demo-c2" value="아웃도어 · 여행" checked><span>아웃도어 · 여행</span></label><label class="choice"><input type="checkbox" name="demo-c2" value="운동 · 스포츠" checked><span>운동 · 스포츠</span></label><label class="choice"><input type="checkbox" name="demo-c2" value="인문학 · 책 · 글" checked><span>인문학 · 책 · 글</span></label><label class="choice"><input type="checkbox" name="demo-c2" value="외국 · 언어" disabled><span>외국 · 언어</span></label>
+    <label class="choice"><input type="checkbox" name="demo-c2" value="문화 · 공연 · 축제" disabled><span>문화 · 공연 · 축제</span></label><label class="choice"><input type="checkbox" name="demo-c2" value="음악 · 악기" disabled><span>음악 · 악기</span></label>
+  </div>
+  <div class="choice-group choice-group--cols-2 choice-group--pair">
+    <label class="choice"><input type="radio" name="demo-c3" value="I · 내향" checked><span>I · 내향</span></label><label class="choice"><input type="radio" name="demo-c3" value="E · 외향"><span>E · 외향</span></label>
+  </div>
+</div>
+<small>둘째 줄은 최대 3개를 채운 모습입니다 — 고르지 않은 나머지가 잠깁니다(화면에서는 profile-form.js 가 data-max 를 보고 잠급니다). 칸 수는 960 이하에서 4·3 → 2, 2 → 1 로 줄고, --pair 만 2 로 남습니다.</small>
+
+<h2>VerifiedBanner — 인증 전 / 인증 후</h2>
+<div class="col">
+  <div class="verified-banner">
+    <svg class="verified-banner__icon" aria-hidden="true"><use href="#icon-infoCircle"></use></svg>
+    <p class="verified-banner__text"><b>학교 인증</b><span>학교 정보를 인증할 수 있어요</span></p>
+    <button class="btn btn--outlined btn--medium" type="button"><span class="btn__label">인증하기</span></button>
+  </div>
+  <div class="verified-banner verified-banner--done">
+    <div class="verified-banner__box">
+      <svg class="verified-banner__icon" aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>
+      <p class="verified-banner__text"><b>본인 인증 완료</b><span>본인인증으로 확인된 정보는 직접 수정할 수 없어요</span></p>
+    </div>
+    <button class="btn btn--blur btn--medium" type="button"><span class="btn__label">재인증</span></button>
+  </div>
+  <div class="verified-banner verified-banner--done">
+    <div class="verified-banner__box">
+      <svg class="verified-banner__icon" aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>
+      <p class="verified-banner__text"><b>회사 인증 완료</b></p>
+    </div>
+    <button class="btn btn--blur btn--medium" type="button"><span class="btn__label">재인증</span></button>
+  </div>
+</div>
+
+<h2>ProfileCard — 기본 / 상세 정보 / 한마디 · 권하는 카드</h2>
+<div class="row" style="align-items:flex-start;gap:16px">
+  <article class="profile-card">
+    <header class="profile-card__header">
+      <div class="profile-card__who"><h2 class="profile-card__name" style="margin:0;text-transform:none;letter-spacing:var(--typography-display-s-semibold-letter-spacing);color:inherit">김땡땡</h2><p class="profile-card__birth">1991년생 · 36세</p></div>
+      <div class="profile-card__tags"><span class="tag tag--accent-pri"><svg aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>회사 인증</span></div>
+      <img class="profile-card__symbol" src="./images/profile-card-symbol.svg" alt="" width="52" height="44">
+    </header>
+    <dl class="profile-card__grid">
+      <div><dt>성별</dt><dd>남성</dd></div><div><dt>키</dt><dd>175cm</dd></div>
+      <div class="is-wide"><dt>거주지</dt><dd>서울 · 강남구</dd></div>
+      <div><dt>직업</dt><dd>IT/개발/기획</dd></div><div><dt>근무지</dt><dd>서울 · 강남구</dd></div>
+      <div class="is-wide"><dt>혼인 경험</dt><dd>사실혼 경험 있음 · 혼인신고 경험 있음</dd></div>
+      <div class="is-wide"><dt>자녀</dt><dd>있음 · 2명 · 비양육</dd></div>
+    </dl>
+  </article>
+  <article class="profile-card profile-card--detail">
+    <header class="profile-card__header">
+      <div class="profile-card__who"><h2 class="profile-card__name" style="margin:0;text-transform:none;letter-spacing:var(--typography-display-s-semibold-letter-spacing);color:inherit">김땡땡</h2><p class="profile-card__birth">1991년생 · 36세</p></div>
+      <div class="profile-card__tags"><span class="tag tag--accent-pri"><svg aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>회사 인증</span><span class="tag tag--accent-pri"><svg aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>혼인·가족 인증</span></div>
+      <img class="profile-card__symbol" src="./images/profile-card-symbol.svg" alt="" width="52" height="44">
+    </header>
+    <hr class="profile-card__divider">
+    <div class="profile-card__detail">
+      <p class="profile-card__kicker">상세 프로필 · 상세 정보</p>
+      <dl class="profile-card__grid">
+        <div class="is-wide"><dt>MBTI</dt><dd><b class="profile-card__mbti">ESTJ</b><span class="profile-card__mbti-desc">외향·감각·사고·판단</span></dd></div>
+        <div><dt>학력 · 학적 상태</dt><dd>대학교 · 재학</dd></div><div><dt>학교</dt><dd>연세대학교 · 신촌캠퍼스</dd></div>
+        <div class="is-wide"><dt>나의 매력</dt><dd><span class="profile-card__chips"><span class="tag">착하다</span><span class="tag">자기관리가 잘 되어 있다</span><span class="tag">남 얘기를 잘 들어준다</span><span class="tag">긍정적이다</span><span class="tag">외모 자신감 있다</span></span></dd></div>
+      </dl>
+    </div>
+  </article>
+  <article class="profile-card profile-card--detail">
+    <header class="profile-card__header">
+      <div class="profile-card__who"><h2 class="profile-card__name" style="margin:0;text-transform:none;letter-spacing:var(--typography-display-s-semibold-letter-spacing);color:inherit">김땡땡</h2><p class="profile-card__birth">1991년생 · 36세</p></div>
+      <div class="profile-card__tags"><span class="tag tag--accent-pri"><svg aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>회사 인증</span><span class="tag tag--accent-pri"><svg aria-hidden="true"><use href="#icon-verifiedUserFilled"></use></svg>혼인·가족 인증</span></div>
+      <img class="profile-card__symbol" src="./images/profile-card-symbol.svg" alt="" width="52" height="44">
+    </header>
+    <hr class="profile-card__divider">
+    <div class="profile-card__detail">
+      <p class="profile-card__kicker">한마디</p>
+      <p class="profile-card__words">낯은 조금 가리지만 친해지면 장난도 많이 쳐요.
+맛있는 걸 먹으면서 오래 이야기하는 걸 좋아하고, 주말엔 산책하거나 새로운 동네를 구경해요.</p>
+    </div>
+  </article>
+  <div class="profile-promo" style="inline-size:380px">
+    <p class="profile-promo__text"><b>나를 더 보여주는 프로필을 작성해 보세요</b><span>상세 프로필을 작성하면 서로를 알아가는 데 도움이 돼요</span></p>
+    <a class="btn btn--filled btn--small" href="./profile-detail.html"><span class="btn__label">지금 작성하기</span></a>
+  </div>
+</div>
+<small>화면에서는 profile.js · profile-detail.js 가 폼의 저장 전 값으로 그립니다. 여기는 Figma 의 예시 값을 적어둔 것입니다.</small>
+
+<h2>Verify — 서류 인증 창 (눌러서 엽니다)</h2>
+<div class="row">
+  <button class="btn btn--outlined btn--medium" type="button" data-verify-open="company"><span class="btn__label">회사·직업 인증</span></button>
+  <button class="btn btn--outlined btn--medium" type="button" data-verify-open="family"><span class="btn__label">혼인·가족 인증</span></button>
+  <button class="btn btn--outlined btn--medium" type="button" data-verify-open="school"><span class="btn__label">학교 인증</span></button>
+</div>
+<small>넓은 화면에서는 가운데, 960 이하에서는 아래에서 올라옵니다. 회사·직업은 "직접 인증" 탭의 "내 상황"을 바꿔가며 여덟 가지를 볼 수 있습니다.</small>
+
+<script type="module">
+document.getElementById('sprite').innerHTML = await (await fetch('./build/icons.svg?v=4a0d8096')).text()
+const ic = '<svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>'
+const btn = (cls, size) => `<button class="btn btn--${cls} btn--${size}"><span class="btn__label">Button</span>${ic}</button>`
+const iconOnly = (cls, size, badge) => `<button class="btn btn--${cls} btn--${size} btn--icon-only" aria-label="다음">${ic}${badge ? '<span class="badge btn__badge"></span>' : ''}</button>`
+const TIERS = [[441,'~440'],[961,'441~960'],[1601,'961~1600'],[Infinity,'1601~']]
+function showTier() {
+  const w = innerWidth
+  const tier = TIERS.find(([max]) => w < max)[1]
+  const el = document.getElementById('bp-probe')
+  const cs = getComputedStyle(el)
+  el.textContent = `viewport ${w}px · 티어 ${tier} · 여백 ${cs.paddingInlineStart} · 최대폭 ${cs.maxInlineSize}`
+}
+addEventListener('resize', showTier); showTier()
+
+const LINKS = ['© 2026 EMOTIONAL ORANGES', '이용약관', ['개인정보처리방침', true], '환불 규정']
+const META = [
+  '주식회사 감정적인오렌지들',
+  '대표이사 권준혁',
+  '사업자등록번호 480-88-03308',
+  '법인등록번호 284111-0437652',
+  '결혼정보업체신고번호 경기-남양-국내-24-0001호',
+  '통신판매업신고번호 2024-별내-0651',
+  '대표번호 0502-1922-2274 (공식문의 채널톡)',
+  '고객센터 평일 10:00–19:00 (주말 및 공휴일 제외)',
+  '협업 및 비즈니스 제안 partner@emotional0ranges.com',
+  '채용 문의 recruit@emotional0ranges.com',
+  '개인정보보호책임자 권준혁 markkwon@emotional0ranges.com',
+  '서울특별시 용산구 대사관로31길 7-2(한남동), 4층',
+  '경기도 남양주시 별내중앙로 34(별내동), 502호',
+]
+const SNS = [
+  ['instagram','인스타그램','is-instagram','https://www.instagram.com/emotional_0ranges'],
+  ['naver-blog','네이버 블로그','is-naver-blog','https://blog.naver.com/emotional0ranges'],
+  ['somoim','소모임','','https://www.somoim.co.kr/4b897e56-f085-11ed-85ea-0a4f64b569631']]
+document.getElementById('footer-host').innerHTML = `
+<footer class="footer">
+  <div class="footer__info">
+    <p class="footer__links">${LINKS.map(l => Array.isArray(l)
+      ? `<a class="is-strong" href="#">${l[0]}</a>`
+      : (l.startsWith('©') ? `<span>${l}</span>` : `<a href="#">${l}</a>`)).join('')}</p>
+    <p class="footer__meta">${META.map(m => `<span>${m.replace(/[<>]/g,'')}</span>`).join('')}</p>
+  </div>
+  <ul class="footer__sns">${SNS.map(([f,label,cls,url]) =>
+    `<li><a class="${cls.trim()}" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="${label} (새 창)"><img src="./logo/sns/${f}.png" alt=""></a></li>`).join('')}</ul>
+</footer>`
+
+const MENU = ['모임','매칭','모임 후기','자주 묻는 질문','저널']
+document.getElementById('gnb-host').innerHTML = `
+<header class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="#" aria-label="emotional oranges">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <!-- 로고와 액션은 화면 끝에 두고, 가운데 블록만 본문과 같은 1280 에서 멈춥니다. -->
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" href="#" aria-current="page">로테이션</a>
+          <a class="segmented__item" href="#">프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu">${MENU.map(m => `<button class="btn btn--ghost btn--medium"><span class="btn__label">${m}</span></button>`).join('')}</nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <span class="badge btn__badge"></span>
+        </button>
+        <button class="btn btn--blur btn--medium btn--icon-only" aria-label="메뉴 열기">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          <span class="badge btn__badge"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>`
+
+document.getElementById('logo-inline').innerHTML =
+  await (await fetch('./build/logo.svg?v=0adc0440')).text() + '<svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>'
+document.getElementById('wt').innerHTML = [400,500,600].map(w =>
+  `<div data-w="${w}" style="font-weight:${w};font-size:20px">디자인 시스템 Pretendard 123 — ${w}</div>`).join('')
+const plain = (cls, size) => `<button class="btn btn--${cls} btn--${size}"><span class="btn__label">Button</span></button>`
+document.getElementById('r0').innerHTML =
+  ['filled','outlined','ghost'].flatMap(t => ['small','medium','large'].map(s => plain(t,s))).join('')
+document.getElementById('r1').innerHTML =
+  ['filled','outlined','ghost'].flatMap(t => ['small','medium','large'].map(s => btn(t,s))).join('')
+document.getElementById('r2').innerHTML =
+  ['filled','outlined','ghost'].map(t => btn(t,'medium')).join('')
+document.querySelectorAll('#r2 .btn').forEach(b => b.classList.add('is-on'))
+document.getElementById('r3').innerHTML = ['small','medium','large'].map(s => btn('blur',s)).join('')
+document.getElementById('r4').innerHTML =
+  ['filled','outlined','ghost','blur'].flatMap(t => ['small','medium','large'].map(s => iconOnly(t,s,false))).join('')
+document.getElementById('r4b').innerHTML =
+  ['filled','outlined','ghost','blur'].flatMap(t => ['small','medium','large'].map(s => iconOnly(t,s,true))).join('')
+
+document.getElementById('r5').innerHTML = `
+  <div class="segmented" role="tablist">
+    <span class="segmented__thumb" aria-hidden="true"></span>
+    <button class="segmented__item is-selected" role="tab" aria-selected="true">온라인</button>
+    <button class="segmented__item" role="tab" aria-selected="false">오프라인</button>
+    <button class="segmented__item" role="tab" aria-selected="false">전체</button>
+    <button class="segmented__item" role="tab" aria-selected="false" disabled>준비 중</button>
+  </div>`
+
+document.getElementById('r6').innerHTML = ['bottom','top'].flatMap(pl => [
+  `<div class="tooltip tooltip--${pl}"><span class="tooltip__label">온라인 매칭 지금 보러 가기</span></div>`,
+  `<div class="tooltip tooltip--${pl} tooltip--has-close"><span class="tooltip__label">온라인 매칭 지금 보러 가기</span><button class="tooltip__close" aria-label="닫기"><svg width="16" height="16" aria-hidden="true"><use href="#icon-close"></use></svg></button></div>`,
+]).join('')
+
+for (const [id, dir] of [['r7','vertical'],['r8','horizontal']]) {
+  document.getElementById(id).innerHTML = `
+    <div class="btn-group btn-group--${dir}" style="width:260px">
+      <button class="btn btn--filled btn--medium"><span class="btn__label">Button</span></button>
+      <button class="btn btn--ghost btn--medium"><span class="btn__label">Button</span></button>
+    </div>`
+}
+
+/* ---- 코드 복사 ---------------------------------------------------------
+   구획(<h2> 하나와 그 아래의 본보기)마다 "코드 복사"와 접힌 코드를 붙입니다.
+
+   코드는 손으로 적어두지 않고 화면에 그려진 것을 읽어 냅니다. 따로 적어두면 본보기를
+   고칠 때 코드를 함께 고치는 것을 잊고, 그러면 복사해 간 코드가 화면과 다르게 나옵니다.
+
+   컴포넌트의 스크립트가 돌기 전에 읽습니다(아래의 init 들보다 앞). 스크립트가 붙이는 것 —
+   자리를 잰 값, is-ready, 지우기 버튼 — 은 가져갈 마크업이 아닙니다. */
+{
+  /** 본보기를 감싼 틀. 화면에 늘어놓으려고 둔 것이라 코드에는 그 안만 냅니다. */
+  const FRAME = '.row, .col, .onbg, .blurbg, #footer-host, #gnb-host, #wt'
+  /** 클래스의 앞머리 → 그 스타일이 든 파일. 이름이 같지 않은 것만 적습니다. */
+  const CSS_ALIAS = { btn: 'button', 'btn-group': 'button-group', segmented: 'segmented-control',
+    participant: 'participants', 'text-field': 'field', 'file-field': 'field',
+    'choice-group': 'choice', 'profile-promo': 'profile-card', 'checkbox-label': 'checkbox' }
+  const CSS_FILES = new Set(['alert-banner', 'app-bar', 'badge', 'button', 'button-group', 'checkbox',
+    'choice', 'field', 'footer', 'gnb', 'participants', 'product-card', 'profile-card',
+    'segmented-control', 'tag', 'toast', 'cookie-consent', 'tooltip', 'verified-banner'])
+  /** 이것이 보이면 스크립트도 필요합니다. */
+  const SCRIPTS = [
+    ['.segmented', "import { initSegmentedControls } from './components/segmented-control.js'"],
+    ['[data-verify-open]', "import { initVerify } from './components/verify.js'  // + verify.css · tabs.css · choice.css · field.css · toast.css"],
+    ['.text-field, .file-field', "import { initFields } from './components/field.js'"],
+    ['.toast', "import { showToast } from './components/toast.js'"],
+    ['.cookie-consent', "import { initCookieConsent } from './components/cookie-consent.js'"],
+  ]
+  const INLINE = new Set(['svg', 'span', 'b', 'a', 'button', 'label', 'p', 'small', 'dt', 'dd', 'li', 'option', 'h1', 'h2', 'h3'])
+
+  /** 들여쓰기해서 적습니다. 안에 요소가 없거나 짧은 것은 한 줄로 둡니다. */
+  function print(node, depth = 0) {
+    const pad = '  '.repeat(depth)
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent.trim()
+      return text ? pad + text : ''
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return ''
+    const tag = node.localName
+    const oneLine = !node.children.length || tag === 'svg' ||
+      (INLINE.has(tag) && node.outerHTML.length < 110)
+    if (oneLine) return pad + node.outerHTML.replace(/\s*\n\s*/g, ' ')
+    const open = node.cloneNode(false).outerHTML.replace(new RegExp(`</${tag}>$`), '')
+    const inner = [...node.childNodes].map((child) => print(child, depth + 1)).filter(Boolean)
+    return [pad + open, ...inner, `${pad}</${tag}>`].join('\n')
+  }
+
+  // 구획의 제목만입니다. 본보기 안의 <h2>(프로필 카드의 이름)는 구획이 아닙니다.
+  for (const title of document.querySelectorAll('body > h2')) {
+    // 이 제목 아래, 다음 제목 전까지가 한 구획입니다.
+    const blocks = []
+    for (let el = title.nextElementSibling; el && el.localName !== 'h2' && el.localName !== 'script'; el = el.nextElementSibling) {
+      if (el.localName !== 'small') blocks.push(el)
+    }
+    const parts = blocks.flatMap((el) => (el.matches(FRAME) ? [...el.children] : [el]))
+    // 컴포넌트가 아닌 구획(폭 안내, 글꼴 견본)은 가져갈 코드가 없습니다.
+    if (!parts.some((el) => el.matches('[class]') || el.querySelector('[class]'))) continue
+    const code = parts.map((el) => print(el)).join('\n')
+    if (!code.trim()) continue
+
+    const scope = document.createElement('div')
+    scope.append(...parts.map((el) => el.cloneNode(true)))
+    const heads = new Set([...scope.querySelectorAll('[class]')].flatMap((el) => [...el.classList])
+      .map((name) => name.split('__')[0].split('--')[0]).map((name) => CSS_ALIAS[name] ?? name))
+    const css = [...heads].filter((name) => CSS_FILES.has(name))
+    const scripts = SCRIPTS.filter(([selector]) => scope.querySelector(selector)).map(([, line]) => line)
+
+    const copy = document.createElement('button')
+    copy.type = 'button'
+    copy.className = 'btn btn--outlined btn--small snippet__copy'
+    copy.innerHTML = '<span class="btn__label">코드 복사</span>'
+    copy.addEventListener('click', async () => {
+      const label = copy.firstElementChild
+      try {
+        await navigator.clipboard.writeText(code)
+        label.textContent = '복사했어요'
+      } catch {
+        // 클립보드를 못 쓰는 환경(권한 · http)에서는 코드를 펼쳐 손으로 고를 수 있게 합니다.
+        details.open = true
+        label.textContent = '아래에서 직접 복사해 주세요'
+      }
+      setTimeout(() => { label.textContent = '코드 복사' }, 1500)
+    })
+    title.append(copy)
+
+    const details = document.createElement('details')
+    details.className = 'snippet'
+    const summary = document.createElement('summary')
+    summary.textContent = '코드 보기'
+    const needs = document.createElement('p')
+    needs.className = 'snippet__needs'
+    needs.innerHTML = [
+      'CSS — <code>build/tokens.css</code>' + css.map((name) => ` · <code>components/${name}.css</code>`).join(''),
+      ...scripts.map((line) => `JS — <code>${line.replace(/</g, '&lt;')}</code>`),
+    ].join('<br>')
+    const pre = document.createElement('pre')
+    pre.textContent = code
+    details.append(summary, needs, pre)
+    ;(blocks.at(-1) ?? title).after(details)
+  }
+}
+
+const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+initSegmentedControls()
+const { initVerify } = await import('./components/verify.js?v=464fd775')
+initVerify()
+// 고르는 칸(셀렉트·달·날짜)은 고르고 나면 초점을 내려놓습니다.
+const { initFields } = await import('./components/field.js?v=de1ad19d')
+initFields()
+// 본보기 카드는 저장된 값과 상관없이 다시 띄웁니다.
+const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+document.querySelector('[data-cookie-consent-open]').addEventListener('click', () => initCookieConsent({ force: true }))
+</script>

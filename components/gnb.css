@@ -1,0 +1,259 @@
+/**
+ * GNB — 전역 내비게이션.
+ *
+ * Figma 의 width variant(small 360–1024 / medium 1025–1600 / large 1601–2000)를
+ * 웹에서는 미디어 쿼리로 옮겼습니다. 마크업은 하나이고 CSS 가 breakpoint 마다
+ * 보일 것과 배치를 바꿉니다 — variant 마다 다른 DOM 을 쓰면 SSR·접근성이 나빠집니다.
+ *
+ *   <header class="gnb">
+ *     <div class="gnb__inner">
+ *       <div class="gnb__side">   로고                      </div>
+ *       <div class="gnb__center"> segmentedControl, 메뉴     </div>
+ *       <div class="gnb__side">   알림·메뉴 버튼             </div>
+ *     </div>
+ *   </header>
+ *
+ * 세 칸인 이유는 폭 제한이 서로 다르기 때문입니다. 로고와 액션은 화면 끝(최대
+ * 1920)까지 나가고, 가운데 블록만 본문과 같은 1280 에서 멈춥니다. 양쪽 칸을
+ * flex: 1 1 0 으로 똑같이 늘려두면 가운데 블록이 화면 정중앙에 놓여, 결과적으로
+ * 본문 1280 컨테이너와 세로선이 맞습니다.
+ *
+ * ⚠️ breakpoint 값이 CSS 에 박혀 있습니다. 미디어 쿼리는 var() 를 받지 못해
+ *    --breakpoint-* 토큰을 조건에 쓸 수 없습니다. 화면 전체 브레이크포인트(961 / 1601)를
+ *    따르며, 값을 바꿀 때는 tokens/semantic.layout.json 과 함께 고쳐야 합니다.
+ */
+
+.gnb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 어느 폭에서든 화면 위에 붙어 따라옵니다. 페이지가 길어 스크롤 도중에도
+     로고와 알림이 손 닿는 곳에 있어야 합니다. 배경이 불투명해 아래 글을 가립니다. */
+  position: sticky;
+  inset-block-start: 0;
+  /* 화면 아래 고정 요소(앱바·전환)는 10 입니다. 헤더가 그 위로 지나갑니다. */
+  z-index: 20;
+  box-sizing: border-box;
+  inline-size: 100%;
+  /* 초광폭 화면에서 로고와 액션이 끝없이 벌어지지 않도록 잡습니다. */
+  max-inline-size: var(--_gnb-max-width);
+  margin-inline: auto;
+  /* small: 좌우가 비대칭입니다 (왼쪽은 컨테이너 여백, 오른쪽 12). 위아래는 16 이라
+     로고 40 과 합쳐 바 높이가 72 가 됩니다 — Figma 13:4186 과 같습니다.
+
+     왼쪽을 토큰으로 두는 것은 로고가 그 아래 본문의 왼쪽 끝과 한 줄에 서야 하기
+     때문입니다. GNB 는 컨테이너 밖이라 여백을 직접 두르는데, 숫자로 적어두면 여백을
+     한 번 바꿀 때마다 여기만 남아 4 씩 어긋납니다. */
+  padding: var(--spacing-400) var(--spacing-300) var(--spacing-400)
+    var(--container-gutter-base);
+  background: var(--colors-bg);
+  color: var(--_gnb-fg);
+  font-family: var(--_font-family-base);
+}
+
+.gnb__inner {
+  flex: 1 0 0;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* 양쪽 칸은 basis 0 에서 똑같이 자라므로 폭이 서로 같아집니다 — 가운데 블록이
+   정확히 가운데 놓이는 근거입니다. max-content 아래로는 줄지 않게 막아, 좁은
+   화면에서 로고가 찌그러지는 대신 가운데 블록이 먼저 줄어듭니다. */
+.gnb__side {
+  flex: 1 1 0;
+  min-inline-size: max-content;
+  display: flex;
+  align-items: center;
+}
+
+.gnb__side--end { justify-content: flex-end; }
+
+.gnb__center {
+  /* 늘어나지 않고(0) 필요하면 줄며(1), 기본 폭이 본문과 같은 1280 입니다. */
+  flex: 0 1 var(--_gnb-max-content-width);
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gnb__logo {
+  flex: none;
+  display: block;
+  block-size: var(--_gnb-logo-height);
+  inline-size: var(--_gnb-logo-width);
+  color: inherit;
+}
+
+/* 안쪽 svg 는 width/height 속성을 들고 있어 링크만 줄이면 그림은 그대로입니다.
+   심볼에 viewBox 가 있어 상자만 맞춰주면 그림이 따라 줄어듭니다. */
+.gnb__logo svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.gnb__menu {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-150);
+  /* 왼쪽에 전환이 있으면 가운데 블록의 오른쪽 끝입니다. */
+  margin-inline-start: auto;
+  /* 메뉴는 ghost 버튼을 그대로 쓰되 글자색만 fg 로 올립니다.
+     .btn 셀렉터를 덮어쓰지 않고 버튼이 읽는 변수를 이 범위에서만 재지정합니다 —
+     버튼이 자기 스타일의 주인으로 남으므로 나중에 hover/focus 가 추가돼도 그대로 따라옵니다. */
+  --_button-ghost-fg: var(--_gnb-fg);
+}
+
+.gnb__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-150);
+  /* 메뉴 텍스트와 같은 이유로 아이콘도 fg 로 올립니다. ghost·blur 둘 다
+     기본값이 seriousGray 700 이라 GNB 안에서만 재지정합니다. */
+  --_button-ghost-fg: var(--_gnb-fg);
+  --_button-blur-fg: var(--_gnb-fg);
+}
+
+/* 말풍선이 이 안에서 자리를 잡습니다. */
+.gnb__segmented { position: relative; }
+
+/* 아직 열리지 않은 쪽(온라인) 아래를 가리키므로 세그먼티드 가운데가 아니라
+   그 절반의 가운데에 섭니다(Figma). 글자가 두 칸보다 넓어 줄을 바꾸지 않게
+   묶어두고, 넘치는 쪽은 좌우로 흘러도 됩니다 — 가리키는 자리가 어긋나는 것보다
+   낫습니다. */
+.gnb .gnb__tip {
+  /* 셀렉터가 `.gnb` 로 한 겹 깊은 것은 순서를 이기기 위해서입니다. Tooltip 은
+     제 자리를 스스로 잡는 컴포넌트라 `.tooltip { position: relative }` 를 들고
+     있고, 두 셀렉터의 무게가 같으면 나중에 실린 파일이 이깁니다 — 페이지마다
+     stylesheet 차례가 달라 어떤 화면에서는 말풍선이 제자리에서 밀려났습니다. */
+  position: absolute;
+  inset-block-start: calc(100% + var(--spacing-200));
+  inset-inline-start: 75%;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+
+/* 사전 등록 안내는 전환보다 길어서, 프라이빗 아래 가운데에 두면 오른쪽 메뉴 쪽으로
+   반쯤 넘어갑니다. 왼쪽 끝을 전환에 맞추고 꼬리만 프라이빗 쪽(75%)으로 옮깁니다. */
+.gnb .gnb__tip.tooltip--accent {
+  inset-inline-start: 0;
+  translate: none;
+}
+.gnb .gnb__tip.tooltip--accent::after { inset-inline-start: 75%; }
+
+/* small 에서는 segmentedControl 과 메뉴가 접힙니다. */
+.gnb__segmented,
+.gnb__menu {
+  display: none;
+}
+
+/* 로그인은 폰에서만 나옵니다. 넓은 화면에서는 메뉴 버튼 아래 내 메뉴가 그 자리를
+   대신합니다 — 로그인 여부도 그 판이 첫 줄에서 말합니다. */
+.gnb__login { display: inline-flex; }
+
+/* small 의 오른쪽에는 로그인과 알림만 둡니다. 이 폭에서는 화면 아래 앱바가
+   이동을 맡고, 햄버거가 열던 화면도 앱바의 "마이"가 들고 있습니다. 위쪽에는 지금
+   볼 것만 남깁니다.
+
+   가리는 것은 내 메뉴 하나입니다 — 예전에는 `.btn--blur` 로 잡고 있었는데, 그
+   생김새를 쓰는 버튼이 하나 더 생기자(로그인) 함께 사라졌습니다. 무엇처럼
+   생겼는지가 아니라 무엇인지로 가립니다. */
+.gnb__actions .my-menu { display: none; }
+
+/* ---- medium (1025px~) -------------------------------------------------- */
+@media (min-width: 961px) {
+  .gnb {
+    /* 위아래 12 입니다. 메뉴가 large(48) 라 12 + 48 + 12 로 바가 정확히 72 가
+       됩니다 — 높이도 함께 못 박아 두는 것은, 가운데 세그먼티드(42)나 로고가
+       바뀌어도 바가 그 높이에서 흔들리지 않게 하기 위해서입니다. 남는 자리는
+       가운데 정렬이 위아래로 나눠 가집니다. */
+    padding: var(--spacing-300) var(--spacing-600);
+    block-size: var(--_gnb-max-height);
+  }
+
+  .gnb__inner { gap: var(--spacing-400); }
+
+  /* 온라인이 아직 열리지 않아, 지금은 각 페이지의 마크업에서 hidden 으로 감춰 둡니다.
+     온라인이 열리면 그 hidden 만 지우면 됩니다(화면 아래의 MobileSwitch 도 함께). */
+  .gnb__segmented:not([hidden]) { display: block; }
+  .gnb__menu { display: flex; }
+  /* 전환이 감춰져 메뉴 혼자 남으면 가운데에 섭니다. 전환의 hidden 을 지우면 저절로
+     오른쪽 끝으로 돌아갑니다. */
+  .gnb__center:has(> .gnb__segmented[hidden]) .gnb__menu { margin-inline: auto; }
+
+  /* 이 폭부터는 앱바가 없으므로 메뉴 버튼이 돌아오고, 알림은 large 에서만 붙습니다. */
+  .gnb__actions .my-menu { display: flex; }
+  .gnb__notify { display: none; }
+  .gnb__login { display: none; }
+}
+
+/* ---- large (1601px~) --------------------------------------------------- */
+@media (min-width: 1601px) {
+  .gnb__notify { display: inline-flex; }
+
+  /* 컨테이너가 이 폭부터 1440 으로 넓어집니다. 가운데 블록을 1280 에 두면 메뉴가
+     본문보다 안쪽에 서서 세로선이 어긋납니다. */
+  .gnb__center { flex-basis: var(--_gnb-max-content-width-lg); }
+}
+
+/* ---- 스티키 (small) -----------------------------------------------------
+   좁은 화면에서는 GNB 가 화면 위에 붙어 따라옵니다. 스크롤이 시작되면 한 단계
+   작아집니다 — 로고 96×30, 바 높이 56.
+
+   `is-sticky` 는 gnb.js 가 붙입니다. CSS 만으로는 "붙어 있는 중"을 알 수 없습니다.
+
+   오른쪽 버튼은 평소와 같은 알림입니다. 붙었다고 버튼이 바뀌면 손이 가던 자리가
+   달라집니다 — 달라지는 것은 로고 크기와 바 높이뿐입니다.
+*/
+
+@media (max-width: 960px) {
+  .gnb {
+    /* ⚠️ Figma 에 전환 시간이 없어 코드에서 정했습니다. 한 번에 튀면 거슬립니다. */
+    transition:
+      padding-block var(--_duration-fast) var(--_easing-standard),
+      translate var(--_duration-base) var(--_easing-standard);
+  }
+
+  .gnb__logo {
+    transition:
+      inline-size var(--_duration-fast) var(--_easing-standard),
+      block-size var(--_duration-fast) var(--_easing-standard);
+  }
+
+  /* 스크롤해도 줄지 않습니다. 로고와 바 높이가 스크롤 도중에 바뀌면 그 아래에
+     붙어 따라오는 것들(모임 찾기의 필터바)이 함께 흔들리고, 무엇보다 로고가
+     작아졌다 커지는 것 자체가 읽는 일과 아무 상관이 없습니다.
+     `is-sticky` 는 여전히 붙지만(gnb.js) 지금은 크기를 바꾸지 않습니다. */
+
+  /* 폰의 GNB 는 64 입니다(Figma 의 small) — 위아래 12 에 로고 30. */
+  .gnb {
+    padding: var(--spacing-300) var(--spacing-300) var(--spacing-300) var(--spacing-400);
+    min-block-size: 64px;
+  }
+
+  .gnb__logo {
+    inline-size: var(--_gnb-logo-sticky-width);
+    block-size: var(--_gnb-logo-sticky-height);
+  }
+
+  /* 아래로 읽어 내려가는 동안에는 물러나 있습니다. 위로 올리면 바로 돌아옵니다. */
+  .gnb.is-hidden { translate: 0 -100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gnb,
+  .gnb__logo { transition: none; }
+}
+
+/* ---- 넓은 화면에만 서는 GNB --------------------------------------------
+   화면 사이 이동을 아래 앱바가 맡고 있는 화면(모임 찾기)에서는, 좁은 화면의 GNB 가
+   로고와 알림만 남은 한 줄이 됩니다. 그 56px 이 목록에서 카드 반 장을 가져가므로
+   그 폭에서는 세우지 않습니다 — 지우는 것은 이 화면의 선택이라 컴포넌트의 기본이
+   아니라 modifier 로 둡니다. */
+@media (max-width: 960px) {
+  .gnb--wide-only { display: none; }
+}

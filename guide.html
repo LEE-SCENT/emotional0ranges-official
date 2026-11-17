@@ -1,0 +1,68 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. 푸터의 사업자
+     등록번호·고객센터 번호가 그렇게 파란 밑줄로 바뀌어 꺼둡니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘. SVG 한 장으로 모든 크기를 감당합니다 — 크기별 PNG 를 따로 두면
+     하나만 바뀌어 탭마다 다른 그림이 뜨는 일이 생깁니다. -->
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>emotional oranges — 디자인 시스템</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 영문 전용 display 서체(display-en-*). Google Fonts 에서 받아옵니다.
+     선언만 담긴 CSS 라, 이 서체를 쓰는 글자가 화면에 없으면 폰트 파일은 받지 않습니다.
+     preconnect 는 그 CSS 를 읽고 나서야 시작될 연결을 미리 열어둡니다.
+
+     media=print 로 걸었다가 도착하면 all 로 바꿉니다. 스타일시트는 원래 첫 그림을
+     막는데, 남의 서버에서 오는 이 한 줄 때문에 우리 화면이 늦게 뜰 이유가 없습니다 —
+     화면에 쓰이는 글자는 어차피 Pretendard 이고, 이 서체는 늦게 와도 그때 바뀝니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap"></noscript>
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<style>
+  body { margin: 0; background: var(--colors-bg); color: var(--colors-fg);
+         font-family: var(--_font-family-base); }
+  main { padding-block: var(--spacing-2000) var(--spacing-3000); }
+  h1 { margin: 0 0 var(--spacing-300);
+       font-size: var(--typography-heading-l-semibold-font-size);
+       font-weight: var(--typography-heading-l-semibold-font-weight);
+       line-height: var(--typography-heading-l-semibold-line-height);
+       letter-spacing: var(--typography-heading-l-semibold-letter-spacing); }
+  p { margin: 0 0 var(--spacing-1000); color: var(--colors-fg-lower);
+      font-size: var(--typography-body-l-regular-font-size);
+      line-height: var(--typography-body-l-regular-line-height); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-300);
+       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  a { display: block; padding: var(--spacing-600); text-decoration: none; color: inherit;
+      border: 1px solid var(--colors-border); border-radius: var(--_rounded-l); }
+  a:hover { background: var(--colors-bg-low); }
+  b { display: block; margin-bottom: var(--spacing-100);
+      font-weight: var(--typography-body-l-semibold-font-weight); }
+  small { color: var(--colors-fg-lower);
+          font-size: var(--typography-body-m-regular-font-size);
+          line-height: var(--typography-body-m-regular-line-height); }
+</style>
+<main class="container">
+  <h1>emotional oranges 디자인 시스템</h1>
+  <p>Figma Foundation 컬렉션에서 뽑은 토큰과 그 위에 올린 컴포넌트입니다.</p>
+  <ul>
+    <li><a href="./"><b>홈 화면</b><small>GNB + KV. 창 폭을 줄이면 441 / 961 / 1601 에서 레이아웃이 바뀝니다.</small></a></li>
+    <li><a href="./components.html"><b>컴포넌트</b><small>badge · button · buttonGroup · segmentedControl · tooltip · GNB · footer</small></a></li>
+    <li><a href="./detail.html"><b>상세 화면</b><small>사진 · 소개 · 일정 · 후기. 오른쪽 일정은 스크롤을 따라옵니다.</small></a></li>
+    <li><a href="./policy.html"><b>상품 카드 정책</b><small>대표 일정 · Tag 노출 조건 · 장소/일정 문구 · 어드민 등록 주의</small></a></li>
+    <li><a href="./templete/index.html"><b>상세 페이지 템플릿</b><small>블록 · 조립 예 · 상세 페이지 한 판. 제품 화면과 분리되어 있습니다 — desktop 750 · mobile 390</small></a></li>
+    <li><a href="./preview.html"><b>토큰</b><small>컬러 · spacing · 타이포그래피 · 아이콘</small></a></li>
+  </ul>
+</main>

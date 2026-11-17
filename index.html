@@ -1,0 +1,482 @@
+<!doctype html>
+<!-- 서비스 홈 화면 — GNB + KV. 브레이크포인트 규칙(441 / 961 / 1601)을 따릅니다. -->
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. 푸터의 사업자
+     등록번호·고객센터 번호가 그렇게 파란 밑줄로 바뀌어 꺼둡니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘. SVG 한 장으로 모든 크기를 감당합니다 — 크기별 PNG 를 따로 두면
+     하나만 바뀌어 탭마다 다른 그림이 뜨는 일이 생깁니다. -->
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 영문 전용 display 서체(display-en-*). Google Fonts 에서 받아옵니다.
+     선언만 담긴 CSS 라, 이 서체를 쓰는 글자가 화면에 없으면 폰트 파일은 받지 않습니다.
+     preconnect 는 그 CSS 를 읽고 나서야 시작될 연결을 미리 열어둡니다.
+
+     media=print 로 걸었다가 도착하면 all 로 바꿉니다. 스타일시트는 원래 첫 그림을
+     막는데, 남의 서버에서 오는 이 한 줄 때문에 우리 화면이 늦게 뜰 이유가 없습니다 —
+     화면에 쓰이는 글자는 어차피 Pretendard 이고, 이 서체는 늦게 와도 그때 바뀝니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap"></noscript>
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/button-group.css?v=99900e0c">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/kv.css?v=9316ae22">
+<link rel="stylesheet" href="./components/tag.css?v=fef5c195">
+<link rel="stylesheet" href="./components/product-card.css?v=85b7c185">
+<link rel="stylesheet" href="./components/section-title.css?v=4a8451fd">
+<link rel="stylesheet" href="./components/footer.css?v=090dd8fc">
+<link rel="stylesheet" href="./components/notice.css?v=071f16b5">
+<link rel="stylesheet" href="./components/mobile-switch.css?v=97bd1681">
+<link rel="stylesheet" href="./components/app-bar.css?v=1129f720">
+<style>
+  /* 본문 기본 서체. 컴포넌트마다 제 서체를 정하고 있지만, 그 밖의 글자
+     (결과 수·안내 문구 같은 것)가 브라우저 기본 서체로 떨어지지 않도록
+     여기에서 한 번 못 박습니다. */
+  body { margin: 0; background: var(--colors-bg); color: var(--colors-fg);
+         font-family: var(--_font-family-base); }
+  /* 화면에는 안 보이지만 스크린리더는 읽는 텍스트 */
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<header class="gnb" data-auto-hide="up">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <!-- 로고와 액션은 화면 끝에 두고, 가운데 블록만 본문과 같은 1280 에서 멈춥니다. -->
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <a class="btn btn--ghost btn--medium" href="./meetups.html"><span class="btn__label">모임</span></a>
+        <a class="btn btn--ghost btn--medium" href="./matching.html"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <!-- 로그인은 폰에서만 나옵니다 — 넓은 화면에서는 메뉴 버튼 아래 내 메뉴가
+             그 자리를 대신합니다. -->
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <!-- 내 메뉴. GNB 가운데 줄의 메뉴가 서비스를 둘러보는 길이라면, 여기는
+             내 프로필·결제·설정처럼 나에게만 해당하는 것들이 섭니다(my-menu.js). -->
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container container--wide">
+  <section class="kv-group" aria-roledescription="캐러셀" aria-label="주요 소식">
+    <div class="kv-group__track">
+    <!-- 넘기는 자리는 이 칸입니다. 안의 소재가 줄어들어도 칸은 그대로여야, 브라우저가
+         재는 스냅 자리가 흔들리지 않습니다 — kv.css 에 이유를 적었습니다. -->
+    <div class="kv-group__slide">
+    <article class="kv is-current">
+      <div class="kv__media" data-youtube="9fRsFJAS1-Y" data-title="감정적인 오렌지들 소개 영상"></div>
+      <div class="kv__scrim"></div>
+
+      <div class="kv__content">
+
+        <button class="btn btn--blur btn--medium btn--icon-only is-on kv__nav" aria-label="이전 슬라이드">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronLeft"></use></svg>
+        </button>
+
+        <div class="kv__body">
+          <div class="kv__title">
+            <h1 class="kv__headline">Not a waste,<br>A plot twist<span class="kv__dot">.</span></h1>
+            <p class="kv__sub">낭비 없는 만남, 예상 밖의 이야기</p>
+          </div>
+          <div class="btn-group btn-group--horizontal kv__cta">
+            <a class="btn btn--filled btn--large is-on" href="#"><span class="btn__label">회원가입</span></a>
+            <a class="btn btn--blur btn--large is-on" href="./meetups.html"><span class="btn__label">모임 보기</span></a>
+          </div>
+        </div>
+
+        <button class="btn btn--blur btn--medium btn--icon-only is-on kv__nav" aria-label="다음 슬라이드">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+        </button>
+      </div>
+
+      <p class="kv__pagination"><b>1</b> <span aria-hidden="true">/</span> <span class="sr-only">중</span> 2</p>
+    </article>
+    </div>
+
+    <!-- 두 장의 헤드라인은 같은 한 문장입니다 — 넘겨도 브랜드가 하는 말은 바뀌지
+         않고, 그 아래 한 줄만 이 장이 무엇을 말하는지 덧붙입니다.
+         ⚠️ 사진은 아직 동작 확인용 임시입니다. -->
+    <div class="kv-group__slide">
+    <article class="kv">
+      <div class="kv__media"><img src="./images/meetup-record.jpg" alt=""></div>
+      <div class="kv__scrim"></div>
+
+      <div class="kv__content">
+
+        <button class="btn btn--blur btn--medium btn--icon-only is-on kv__nav" aria-label="이전 슬라이드">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronLeft"></use></svg>
+        </button>
+
+        <div class="kv__body">
+          <div class="kv__title">
+            <h2 class="kv__headline">취향이 같으면<br>대화가 쉬워져요<span class="kv__dot">.</span></h2>
+            <p class="kv__sub">나와 비슷한 사람을 좀 더 빠르게 만날 수 있는 방법</p>
+          </div>
+          <div class="btn-group btn-group--horizontal kv__cta">
+            <!-- 이 장에서 갈 곳은 하나뿐이라 버튼도 하나입니다. -->
+            <button class="btn btn--filled btn--large is-on"><span class="btn__label">테마 모임 보기</span></button>
+          </div>
+        </div>
+
+        <button class="btn btn--blur btn--medium btn--icon-only is-on kv__nav" aria-label="다음 슬라이드">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+        </button>
+      </div>
+
+      <p class="kv__pagination"><b>2</b> <span aria-hidden="true">/</span> <span class="sr-only">중</span> 2</p>
+    </article>
+    </div>
+    </div>
+  </section>
+
+  <section class="product-card-section">
+    <header class="section-title">
+      <div class="section-title__content">
+        <h2 class="section-title__heading">금요일 저녁, 여섯 명의 온도</h2>
+        <p class="section-title__desc">한 주의 끝, 새로운 만남의 시작</p>
+      </div>
+    </header>
+    <div class="product-card-group">
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-lamp.jpg" alt="" loading="lazy">
+              <div class="product-card__tags">
+                <span class="tag">8월 22일 (토) 오후 2시</span>
+              </div>
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=dolsing">돌싱 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">서울 강남 외 4개 지역 · 일정 5개</p>
+              <p class="product-card__price">42,000원~</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-couple.jpg" alt="" loading="lazy">
+              <div class="product-card__tags">
+                <span class="tag">8월 25일 (화) 저녁 7시</span><span class="tag tag--accent-pri">남성 2자리 남음</span><span class="tag tag--accent-sec">여성 마감</span>
+              </div>
+              <p class="product-card__status">
+                <span class="is-remaining">남성 2자리 남음</span>
+                <span class="is-closed">여성 마감</span>
+              </p>
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=tikitaka">티키타카 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">경기 성남시 외 4개 지역 · 일정 5개</p>
+              <p class="product-card__price"><b>할인가</b> 33,000원~</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-record.jpg" alt="" loading="lazy">
+              <div class="product-card__tags">
+                <span class="tag">8월 24일 (월) 저녁 2시</span>
+              </div>
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=theme">테마 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">경기 성수 외 4개 지역 · 일정 5개</p>
+              <p class="product-card__price">42,000원~</p>
+            </div>
+          </article>
+          <a class="product-card-more" href="#">
+            <span class="btn btn--blur btn--medium btn--icon-only">
+              <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+            </span>
+            <span>더보기</span>
+          </a>
+      </div>
+  </section>
+</main>
+
+<section class="notice">
+  <div class="notice__inner">
+    <div class="notice__header">
+      <h2 class="notice__heading">누적 회원 7만 8천명이 선택한<br>진짜 만남<span class="dot">.</span></h2>
+      <p class="notice__lead">본인 확인부터 현장 운영까지 꼼꼼하게 관리해요.</p>
+    </div>
+    <ul class="notice__items">
+        <li class="notice__item">
+          <svg aria-hidden="true"><use href="#icon-idCardFilled"></use></svg>
+          <div class="notice__item-text">
+            <p class="notice__item-title">본인·직장 인증 후 참여</p>
+            <p class="notice__item-desc">본인과 직장 정보 확인을 완료한 회원만 참여할 수 있어요</p>
+          </div>
+        </li>
+        <li class="notice__item">
+          <svg aria-hidden="true"><use href="#icon-hostFilled"></use></svg>
+          <div class="notice__item-text">
+            <p class="notice__item-title">호스트가 함께하는 모임</p>
+            <p class="notice__item-desc">처음 참여해도 편하게 대화할 수 있도록 호스트가 진행해요</p>
+          </div>
+        </li>
+        <li class="notice__item">
+          <svg aria-hidden="true"><use href="#icon-heartPin"></use></svg>
+          <div class="notice__item-text">
+            <p class="notice__item-title">직접 운영하는 모임</p>
+            <p class="notice__item-desc">전국 30개 지역에서 직접 운영하고 안전하게 관리해요</p>
+          </div>
+        </li>
+    </ul>
+  </div>
+</section>
+
+
+<div class="container">
+  <section class="product-card-section">
+    <header class="section-title">
+      <div class="section-title__content">
+        <h2 class="section-title__heading">어떤 만남을 찾고 있나요?</h2>
+        <p class="section-title__desc">취향과 분위기에 맞는 모임을 골라보세요</p>
+      </div>
+    </header>
+    <div class="product-card-group product-card-group--category">
+      <article class="product-card product-card--category">
+        <div class="product-card__media"><img src="./images/meetup-couple.jpg" alt=""></div>
+        <div class="product-card__info">
+          <h3 class="product-card__title"><a href="./detail.html?product=tikitaka">티키타카</a></h3>
+          <p class="product-card__desc">모임 3개</p>
+        </div>
+      </article>
+      <article class="product-card product-card--category">
+        <div class="product-card__media"><img src="./images/meetup-lamp.jpg" alt=""></div>
+        <div class="product-card__info">
+          <h3 class="product-card__title"><a href="./detail.html?product=dolsing">돌싱</a></h3>
+          <p class="product-card__desc">모임 1개</p>
+        </div>
+      </article>
+      <article class="product-card product-card--category">
+        <div class="product-card__media"><img src="./images/meetup-record.jpg" alt=""></div>
+        <div class="product-card__info">
+          <h3 class="product-card__title"><a href="./detail.html?product=theme">테마 로테이션</a></h3>
+          <p class="product-card__desc">모임 1개</p>
+        </div>
+      </article>
+      <article class="product-card product-card--category">
+        <div class="product-card__media"><img src="./images/detail-photo-5.jpg" alt=""></div>
+        <div class="product-card__info">
+          <h3 class="product-card__title"><a href="./detail.html?product=signal">사케시그널</a></h3>
+          <p class="product-card__desc">모임 3개</p>
+        </div>
+      </article>
+      <article class="product-card product-card--category">
+        <div class="product-card__media"><img src="./images/promo-main.jpg" alt=""></div>
+        <div class="product-card__info">
+          <h3 class="product-card__title"><a href="./detail.html?product=black">블랙라운지</a></h3>
+          <p class="product-card__desc">모임 1개</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="product-card-section">
+    <header class="section-title">
+      <div class="section-title__content">
+        <h2 class="section-title__heading">블랙멤버 전용 프리미엄 소개팅</h2>
+        <p class="section-title__desc">추가 인증을 완료한 회원을 위한 프라이빗한 만남이에요</p>
+      </div>
+    </header>
+    <article class="product-card product-card--promotion is-locked">
+      <div class="product-card__media">
+        <div class="product-card__main"><img src="./images/promo-main.jpg" alt=""></div>
+        <div class="product-card__tiles">
+        <div class="product-card__tile"><img src="./images/promo-tile-1.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-2.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-3.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-4.jpg" alt=""></div>
+        <div class="product-card__tile"><img src="./images/promo-tile-5.jpg" alt=""></div>
+          <a class="product-card__tile product-card__tile--more" href="#">
+            <img src="./images/promo-tile-4.jpg" alt="">
+            <span class="product-card__more-label">
+              <svg aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+              더보기
+            </span>
+          </a>
+        </div>
+        <div class="product-card__tags">
+          <span class="tag">9월 6일 (일) 저녁 7시</span>
+          <span class="tag tag--accent-pri">남성 2자리 남음</span>
+        </div>
+        <p class="product-card__status">
+          <span class="is-remaining">남성 2자리 남음</span>
+          <span class="is-closed">여성 마감</span>
+        </p>
+      </div>
+      <div class="product-card__info">
+        <h3 class="product-card__title"><a href="./detail.html?product=black">블랙라운지 로테이션 소개팅</a></h3>
+        <p class="product-card__desc">서울 강남</p>
+        <p class="product-card__price"><svg class="product-card__lock" aria-hidden="true"><use href="#icon-lockFilled"></use></svg>로그인 후 가격 확인</p>
+      </div>
+    </article>
+  </section>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer__info">
+      <p class="footer__links">
+        <span>© 2026 EMOTIONAL ORANGES</span>
+        <a href="#">이용약관</a>
+        <a class="is-strong" href="https://emotional0ranges.com/privacy" data-sheet-open="privacy-sheet">개인정보처리방침</a>
+        <a href="#">환불 규정</a>
+      </p>
+      <p class="footer__meta">
+        <span>주식회사 감정적인오렌지들</span>
+        <span>대표이사 권준혁</span>
+        <span>사업자등록번호 480-88-03308</span>
+        <span>법인등록번호 284111-0437652</span>
+        <span>결혼정보업체신고번호 경기-남양-국내-24-0001호</span>
+        <span>통신판매업신고번호 2024-별내-0651</span>
+        <span>대표번호 0502-1922-2274 (공식문의 채널톡)</span>
+        <span>고객센터 평일 10:00–19:00 (주말 및 공휴일 제외)</span>
+        <span>협업 및 비즈니스 제안 partner@emotional0ranges.com</span>
+        <span>채용 문의 recruit@emotional0ranges.com</span>
+        <span>개인정보보호책임자 권준혁 markkwon@emotional0ranges.com</span>
+        <span>서울특별시 용산구 대사관로31길 7-2(한남동), 4층</span>
+        <span>경기도 남양주시 별내중앙로 34(별내동), 502호</span>
+      </p>
+    </div>
+    <ul class="footer__sns">
+      <li><a class="is-instagram" href="https://www.instagram.com/emotional_0ranges" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 (새 창)"><img src="./logo/sns/instagram.png" alt=""></a></li>
+      <li><a class="is-naver-blog" href="https://blog.naver.com/emotional0ranges" target="_blank" rel="noopener noreferrer" aria-label="네이버 블로그 (새 창)"><img src="./logo/sns/naver-blog.png" alt=""></a></li>
+      <li><a href="https://www.somoim.co.kr/4b897e56-f085-11ed-85ea-0a4f64b569631" target="_blank" rel="noopener noreferrer" aria-label="소모임 (새 창)"><img src="./logo/sns/somoim.png" alt=""></a></li>
+    </ul>
+  </footer>
+</div>
+
+<div class="mobile-switch" hidden>
+  <div class="mobile-switch__inner">
+    <div class="tooltip tooltip--top tooltip--has-close mobile-switch__tip">
+      <span class="tooltip__label">온라인 매칭 지금 보러 가기</span>
+      <button class="tooltip__close" aria-label="닫기">
+        <svg width="16" height="16" aria-hidden="true"><use href="#icon-close"></use></svg>
+      </button>
+    </div>
+    <div class="segmented" role="tablist" aria-label="모임 형태">
+      <span class="segmented__thumb" aria-hidden="true"></span>
+      <button class="segmented__item is-selected" role="tab" aria-selected="true">오프라인</button>
+      <button class="segmented__item" role="tab" aria-selected="false">온라인</button>
+    </div>
+  </div>
+</div>
+
+<nav class="app-bar app-bar--fixed" data-auto-hide="down" aria-label="주요 메뉴">
+  <a class="app-bar__item is-active" href="#" aria-current="page">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-homeFilled"></use></svg>
+    <span class="app-bar__label">홈</span>
+  </a>
+  <a class="app-bar__item" href="./meetups.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+    <span class="app-bar__label">탐색</span>
+  </a>
+  <a class="app-bar__item" href="./matching.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-match"></use></svg>
+    <span class="app-bar__label">매칭</span>
+  </a>
+  <a class="app-bar__item" href="#">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+    <span class="app-bar__label">추천</span>
+  </a>
+  <a class="app-bar__item" href="./my.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+    <span class="app-bar__label">마이</span>
+  </a>
+</nav>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initKvVideo } = await import('./components/kv.js?v=d2d085a7')
+  initKvVideo()
+  const { initKvCarousels } = await import('./components/kv-carousel.js?v=f72a0dce')
+  initKvCarousels()
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  const { initAutoHide } = await import('./components/auto-hide.js?v=ef9c163a')
+  initAutoHide()
+  const { initAppBarPress } = await import('./components/app-bar.js?v=6deb1462')
+  initAppBarPress()
+  // 카드의 날짜·잔여석·가격은 상세와 같은 데이터에서 나옵니다. 적어두면 어긋납니다.
+  // 뒤로 돌아온 화면은 맨 위에서 시작합니다.
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initProductCards } = await import('./components/product-cards.js?v=9fe45dac')
+  initProductCards()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>

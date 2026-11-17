@@ -1,0 +1,798 @@
+<!doctype html>
+<!-- 상품 상세 화면 — 사진·소개·일정·후기. Figma 22:12063 을 따릅니다. -->
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. 푸터의 사업자
+     등록번호·고객센터 번호가 그렇게 파란 밑줄로 바뀌어 꺼둡니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘. SVG 한 장으로 모든 크기를 감당합니다 — 크기별 PNG 를 따로 두면
+     하나만 바뀌어 탭마다 다른 그림이 뜨는 일이 생깁니다. -->
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>티키타카 로테이션 소개팅 — 감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<!-- 영문 전용 display 서체(display-en-*). Google Fonts 에서 받아옵니다.
+     선언만 담긴 CSS 라, 이 서체를 쓰는 글자가 화면에 없으면 폰트 파일은 받지 않습니다.
+     preconnect 는 그 CSS 를 읽고 나서야 시작될 연결을 미리 열어둡니다.
+
+     media=print 로 걸었다가 도착하면 all 로 바꿉니다. 스타일시트는 원래 첫 그림을
+     막는데, 남의 서버에서 오는 이 한 줄 때문에 우리 화면이 늦게 뜰 이유가 없습니다 —
+     화면에 쓰이는 글자는 어차피 Pretendard 이고, 이 서체는 늦게 와도 그때 바뀝니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600&display=swap"></noscript>
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/button-group.css?v=99900e0c">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/tag.css?v=fef5c195">
+<link rel="stylesheet" href="./components/product-card.css?v=85b7c185">
+<link rel="stylesheet" href="./components/section-title.css?v=4a8451fd">
+<link rel="stylesheet" href="./components/footer.css?v=090dd8fc">
+<link rel="stylesheet" href="./components/tabs.css?v=a962487a">
+<link rel="stylesheet" href="./components/option-card.css?v=0b9df8d8">
+<link rel="stylesheet" href="./components/schedule.css?v=a93de2d8">
+<link rel="stylesheet" href="./components/confirm.css?v=6a6a0bdf">
+<link rel="stylesheet" href="./components/review.css?v=1516c2bf">
+<link rel="stylesheet" href="./components/detail.css?v=7cae8d5d">
+<link rel="stylesheet" href="./components/favorite.css?v=8148f536">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/participants.css?v=3d11ed3c">
+<link rel="stylesheet" href="./components/app-bar.css?v=1129f720">
+<link rel="stylesheet" href="./components/top-bar.css?v=7633d627">
+<link rel="stylesheet" href="./components/image-viewer.css?v=f525c651">
+<link rel="stylesheet" href="./components/bottom-cta.css?v=4d73a6db">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<style>
+  body {
+    margin: 0;
+    background: var(--colors-bg);
+    color: var(--colors-fg);
+    /* 본문 기본 서체. 컴포넌트마다 제 서체를 정하고 있지만, 그 밖의 글자가
+       브라우저 기본 서체로 떨어지지 않도록 여기에서 한 번 못 박습니다. */
+    font-family: var(--_font-family-base);
+    /* 컴포넌트마다 따로 걸지 않고 여기서 한 번 정합니다. 이 화면에는 어느 컴포넌트에도
+       속하지 않는 글(제목·설명)이 있어, 빠뜨리면 그 부분만 시스템 글꼴로 나옵니다. */
+    font-family: var(--_font-family-base);
+  }
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<header class="gnb" data-auto-hide="up">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <!-- 로고와 액션은 화면 끝에 두고, 가운데 블록만 본문과 같은 1280 에서 멈춥니다. -->
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임</span></button>
+        <a class="btn btn--ghost btn--medium" href="./matching.html"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <!-- 로그인은 폰에서만 나옵니다 — 넓은 화면에서는 메뉴 버튼 아래 내 메뉴가
+             그 자리를 대신합니다. -->
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <!-- 내 메뉴. GNB 가운데 줄의 메뉴가 서비스를 둘러보는 길이라면, 여기는
+             내 프로필·결제·설정처럼 나에게만 해당하는 것들이 섭니다(my-menu.js). -->
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 좁은 화면에서 GNB 를 대신합니다. 상세 화면에서 필요한 것은 메뉴가 아니라 왔던
+     곳으로 돌아가는 길과, 이 모임을 공유하거나 찜하는 것입니다. -->
+<header class="top-bar top-bar--page detail-topbar">
+  <button class="btn btn--ghost btn--medium btn--icon-only" type="button" data-back="./index.html" aria-label="뒤로">
+    <svg class="btn__icon" aria-hidden="true"><use href="#icon-arrowBack"></use></svg>
+  </button>
+  <div class="btn-group btn-group--horizontal">
+    <button class="btn btn--ghost btn--medium btn--icon-only" aria-label="공유하기">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-share"></use></svg>
+    </button>
+    <button class="btn btn--ghost btn--medium btn--icon-only" data-favorite="meeting" aria-label="찜하기">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-favorite"></use></svg>
+    </button>
+  </div>
+</header>
+
+<main class="container detail-page">
+  <div class="detail-top">
+    <div class="detail-gallery">
+      <button class="detail-gallery__item" data-viewer-open="detail-photos" data-viewer-index="0" aria-label="1번째 사진 크게 보기">
+        <img src="./images/detail-photo-1.jpg" alt="조명이 놓인 테이블에서 마주 앉아 대화하는 두 사람">
+      </button>
+      <button class="detail-gallery__item" data-viewer-open="detail-photos" data-viewer-index="1" aria-label="2번째 사진 크게 보기">
+        <img src="./images/detail-photo-2.jpg" alt="턴테이블에 레코드를 올려둔 라운지 한켠">
+      </button>
+      <button class="detail-gallery__item" data-viewer-open="detail-photos" data-viewer-index="2" aria-label="3번째 사진 크게 보기">
+        <img src="./images/detail-photo-3.jpg" alt="기둥 사이 자리에서 이야기를 나누는 참가자들">
+      </button>
+      <button class="detail-gallery__item" data-viewer-open="detail-photos" data-viewer-index="3" aria-label="4번째 사진 크게 보기">
+        <img src="./images/detail-photo-4.jpg" alt="벽돌벽 앞 테이블에서 프로필 카드를 함께 보는 두 사람">
+      </button>
+      <button class="btn btn--blur btn--medium btn--icon-only is-on detail-gallery__more" data-viewer-open="detail-photos" aria-label="사진 모두 보기">
+        <svg class="btn__icon" aria-hidden="true"><use href="#icon-window"></use></svg>
+      </button>
+    </div>
+
+    <div class="detail-info">
+      <header class="detail-info__header">
+        <div class="detail-info__title">
+          <h1 class="detail-info__name" data-product-title>티키타카 로테이션 소개팅</h1>
+          <p class="detail-info__lead" data-product-lead>한 번의 참여로 6~12명의 이성과<br>1:1 10분씩 대화하는 대표 프로그램</p>
+        </div>
+        <div class="btn-group btn-group--horizontal">
+          <button class="btn btn--ghost btn--medium btn--icon-only" aria-label="공유하기">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-share"></use></svg>
+          </button>
+          <button class="btn btn--ghost btn--medium btn--icon-only" data-favorite="meeting" aria-label="찜하기">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-favorite"></use></svg>
+          </button>
+        </div>
+      </header>
+
+      <ul class="detail-info__facts">
+        <!-- 글과 날짜는 아래 후기 목록의 첫 항목에서 옮겨 적습니다. 여기에 따로
+             적어두면 언젠가 두 곳이 갈립니다 — 실제로 갈려 있었습니다. -->
+        <li class="detail-info__fact" data-latest-review>
+          <img src="./images/detail-info-1.png" alt="">
+          <span class="detail-info__fact-text">
+            <b>최근 게스트 후기</b>
+            <span data-latest-review-body>“진행이 매끄러워서 처음인데도 어색하지 않았어요. 자리배치가 좋았습니다.”</span>
+            <small><time data-latest-review-date>2026년 8월 27일</time></small>
+          </span>
+        </li>
+        <li class="detail-info__fact">
+          <img src="./images/detail-info-2.png" alt="">
+          <span class="detail-info__fact-text" data-product-fact="duration">
+            <b>약 120분 동안 진행</b>
+            <span data-product-fact-body>6~12명의 이성과 10분씩 돌아가며 1:1 대화를 나눠요</span>
+          </span>
+        </li>
+        <li class="detail-info__fact">
+          <img src="./images/detail-info-3.png" alt="">
+          <span class="detail-info__fact-text" data-product-fact="included">
+            <b>포함 사항</b>
+            <span data-product-fact-body>커피, 차, 아이스티 등 음료 및 민트, 쿠키, 초콜릿 간식 제공</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detail-body">
+    <div class="detail-main">
+      <nav class="tabs" aria-label="상세 정보">
+        <span class="tabs__thumb" aria-hidden="true"></span>
+      <a class="tabs__item is-active" href="#section-intro" aria-current="true">모임 소개</a>
+      <a class="tabs__item" href="#section-review">리뷰</a>
+      <!-- 이 둘은 아직 화면에 없는 섹션입니다. 갈 곳이 정해지면 href 만 채우면 됩니다.
+           빈 href("#")를 두면 누를 때마다 문서 맨 위로 튑니다. -->
+      <a class="tabs__item">모임 디테일</a>
+      <a class="tabs__item">위치 및 정보</a>
+      <a class="tabs__item" href="#section-notice">안내사항</a>
+      </nav>
+
+      <!-- 펼쳐진 채로 두고 detail-intro.js 가 접습니다. 스크립트가 없으면 소개가 그대로 다 보입니다. -->
+      <div class="detail-intro" id="section-intro">
+        <div class="detail-intro__content">
+          <img src="./images/detail-intro.jpg" alt="티키타카 로테이션 소개팅 소개">
+        </div>
+        <div class="detail-intro__more">
+          <button class="btn btn--outlined btn--medium" data-expand>
+            <span class="btn__label">소개 전체 보기</span>
+          </button>
+        </div>
+      </div>
+
+      <section class="review" id="section-review">
+        <header class="review__header">
+          <p class="review__average">
+            <svg aria-hidden="true"><use href="#icon-eoSymbol"></use></svg>
+            <b>4.9</b>
+          </p>
+          <p class="review__label">모임 만족도</p>
+          <p class="review__lead">실제 참여자들이 남긴 후기와 평점을 바탕으로 했어요</p>
+        </header>
+
+        <ul class="review__list">
+      <li class="review__item" data-days-ago="3">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">진행이 매끄러워서 처음인데도 어색하지 않았어요. 자리배치가 좋았습니다.</p>
+        <p class="review__profile"><span>김**</span><span>서울 강남</span><span>27세</span></p>
+      </li>
+      <li class="review__item" data-days-ago="4">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">기대보다 훨씬 좋았습니다. 같은 관심사인 분들이라 대화가 잘 통했어요.</p>
+        <p class="review__profile"><span>O**</span><span>서울 강남</span><span>26세</span></p>
+      </li>
+      <li class="review__item" data-days-ago="5">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">호스트가 분위기를 잘 잡아주셔서 편했어요. 다음에 또 참여하고 싶어요.</p>
+        <p class="review__profile"><span>최**</span><span>서울 강남</span><span>32세</span></p>
+      </li>
+      <li class="review__item" data-days-ago="6">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">장소가 조용하고 깔끔했어요. 성비도 잘 맞아서 만족스러웠습니다.</p>
+        <p class="review__profile"><span>데**</span><span>서울 강남</span><span>33세</span></p>
+      </li>
+      <li class="review__item" data-days-ago="7">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">호스트가 분위기를 잘 잡아주셔서 편했어요. 다음에 또 참여하고 싶어요.</p>
+        <p class="review__profile"><span>최**</span><span>서울 강남</span><span>32세</span></p>
+      </li>
+      <li class="review__item" data-days-ago="8">
+        <p class="review__rating">
+          <span class="review__stars" role="img" aria-label="5점 만점에 5점">
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+          </span>
+          <span>· <time class="review__ago">3일 전</time></span>
+        </p>
+        <p class="review__body">장소가 조용하고 깔끔했어요. 성비도 잘 맞아서 만족스러웠습니다.</p>
+        <p class="review__profile"><span>데**</span><span>서울 강남</span><span>33세</span></p>
+      </li>
+        </ul>
+
+        <button class="btn btn--outlined btn--medium"><span class="btn__label">7개 후기 모두 보기</span></button>
+      </section>
+
+    </div>
+
+    <!-- 961 부터 이 <dialog> 와 판은 display:contents 로 자리에서 빠져, 일정이
+         본문 옆에 그대로 섭니다. 좁아지면 시트가 됩니다 — 목록은 한 벌뿐입니다. -->
+    <dialog class="sheet sheet--inline" id="apply-sheet" aria-label="일정 선택">
+     <div class="sheet__panel">
+      <aside class="detail-side">
+      <div class="schedule">
+      <div class="schedule__list" data-sheet-scroll>
+        <div class="schedule__group">
+          <time class="schedule__date"></time>
+          <ul class="schedule__options">
+            <li>
+              <label class="option-card" data-date-in="0" data-discount-in="9024"
+                     data-time="오후 2시" data-where="서울 강남 · 27-38세"
+                     data-price="45000" data-discount="10000">
+                <input class="sr-only" type="radio" name="schedule" value="s1" checked>
+                <span class="option-card__main">
+                  <span class="option-card__time">오후 2:00</span>
+                  <span class="option-card__price"><b>35,000원</b> <s>45,000원</s></span>
+                  <span class="option-card__place">서울 강남</span>
+                </span>
+                <span class="option-card__aside">
+                  <span class="option-card__deadline">
+                    <svg aria-hidden="true"><use href="#icon-schedule"></use></svg>
+                    <span><time class="countdown">02:30:24</time> 남음</span>
+                  </span>
+                  <span class="option-card__seats">남성 6 · 여성 5자리 남음</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="option-card" data-date-in="0" data-discount-in="284400"
+                     data-time="밤 10시" data-where="서울 강남 · 27-38세"
+                     data-price="38000" data-discount="10000">
+                <input class="sr-only" type="radio" name="schedule" value="s2">
+                <span class="option-card__main">
+                  <span class="option-card__time">밤 10:00</span>
+                  <span class="option-card__price"><b>28,000원</b> <s>38,000원</s></span>
+                  <span class="option-card__place">서울 강남</span>
+                </span>
+                <span class="option-card__aside">
+                  <span class="option-card__deadline" hidden>
+                    <svg aria-hidden="true"><use href="#icon-schedule"></use></svg>
+                    <span><time class="countdown">02:30:24</time> 남음</span>
+                  </span>
+                  <span class="option-card__seats">남성 3자리 남음</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div class="schedule__group">
+          <time class="schedule__date"></time>
+          <ul class="schedule__options">
+            <li>
+              <label class="option-card" data-date-in="1"
+                     data-time="저녁 7시" data-where="서울 성수 · 27-38세"
+                     data-price="56000" data-discount="10000">
+                <input class="sr-only" type="radio" name="schedule" value="s3">
+                <span class="option-card__main">
+                  <span class="option-card__time">저녁 7:00</span>
+                  <span class="option-card__price"><b>46,000원</b> <s>56,000원</s></span>
+                  <span class="option-card__place">서울 성수</span>
+                </span>
+                <span class="option-card__aside">
+                  <span class="option-card__seats">여성 1자리 남음</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="option-card option-card--alert" data-date-in="1"
+                     data-time="저녁 7시" data-where="수원 광교 · 27-38세"
+                     data-price="45000" data-discount="0">
+                <input class="sr-only" type="radio" name="schedule" value="s5">
+                <span class="option-card__main">
+                  <span class="option-card__time">저녁 7:00</span>
+                  <span class="option-card__price"><b>45,000원</b></span>
+                  <span class="option-card__place">수원 광교</span>
+                </span>
+                <span class="option-card__aside">
+                  <span class="option-card__seats"><svg aria-hidden="true"><use href="#icon-notifications"></use></svg>빈자리 알림 가능</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div class="schedule__group">
+          <time class="schedule__date"></time>
+          <ul class="schedule__options">
+            <li>
+              <label class="option-card" data-date-in="3"
+                     data-time="저녁 7시" data-where="경기 성남 · 30-42세"
+                     data-price="45000" data-discount="10000">
+                <input class="sr-only" type="radio" name="schedule" value="s4">
+                <span class="option-card__main">
+                  <span class="option-card__time">저녁 7:00</span>
+                  <span class="option-card__price"><b>35,000원</b> <s>45,000원</s></span>
+                  <span class="option-card__place">경기 성남</span>
+                </span>
+                <span class="option-card__aside">
+                  <span class="option-card__seats">남성 2 · 여성 4자리 남음</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        </div>
+        <!-- 목록 아래에 "모든 날짜 보기"가 붙는 자리입니다. 지금은 일정이 몇 개
+             없어 더 볼 것이 없으므로 두지 않습니다. -->
+        <div class="schedule__actions">
+          <a class="btn btn--filled btn--large" href="./checkout.html?schedule=s1"><span class="btn__label">신청하기</span></a>
+        </div>
+      </div>
+      </aside>
+     </div>
+    </dialog>
+  </div>
+
+  <section class="detail-notice" id="section-notice">
+    <h2 class="detail-notice__title">알아두어야 할 사항</h2>
+    <ul class="detail-notice__items">
+    <li class="detail-notice__item">
+      <svg aria-hidden="true"><use href="#icon-asterisk"></use></svg>
+      <span class="detail-notice__item-text">
+        <b>모임 참여 조건</b>
+        <span>본인 인증을 마친 회원만 신청할 수 있어요.</span>
+      </span>
+    </li>
+    <li class="detail-notice__item">
+      <svg aria-hidden="true"><use href="#icon-creditCard"></use></svg>
+      <span class="detail-notice__item-text">
+        <b>결제</b>
+        <span>카드 또는 토스페이로 결제할 수 있어요.</span>
+      </span>
+    </li>
+    <li class="detail-notice__item">
+      <svg aria-hidden="true"><use href="#icon-calendarClosed"></use></svg>
+      <span class="detail-notice__item-text">
+        <b>환불 정책</b>
+        <span>신청 취소 시 환불 규정에 따라 환불돼요.</span>
+        <a href="#refund-policy" data-confirm-open="refund-policy">자세히 알아보기</a>
+      </span>
+    </li>
+    </ul>
+  </section>
+
+  <section class="product-card-section">
+    <header class="section-title">
+      <div class="section-title__content">
+        <h2 class="section-title__heading">비슷한 모임 더 보기</h2>
+        <p class="section-title__desc">같은 지역에서 열리는 다른 모임이에요</p>
+      </div>
+    </header>
+    <div class="product-card-group">
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-lamp.jpg" alt="" loading="lazy">
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=dolsing">돌싱 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">서울 강남 외 4개 지역 · 일정 5개</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-couple.jpg" alt="" loading="lazy">
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=tikitaka">티키타카 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">경기 성남시 외 4개 지역 · 일정 5개</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/meetup-record.jpg" alt="" loading="lazy">
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html?product=theme">테마 로테이션 소개팅</a></h3>
+              <p class="product-card__desc">경기 성수 외 4개 지역 · 일정 5개</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/detail-gallery-3.jpg" alt="">
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html">와인 클래스 소개팅</a></h3>
+              <p class="product-card__desc">서울 성수 외 2개 지역 · 일정 3개</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <div class="product-card__media">
+              <img src="./images/detail-gallery-4.jpg" alt="">
+            </div>
+            <div class="product-card__info">
+              <h3 class="product-card__title"><a href="./detail.html">북토크 로테이션</a></h3>
+              <p class="product-card__desc">경기 판교 외 1개 지역 · 일정 2개</p>
+            </div>
+          </article>
+      </div>
+  </section>
+</main>
+
+<div class="container detail-page has-bottom-cta">
+  <footer class="footer">
+    <div class="footer__info">
+      <p class="footer__links">
+        <span>© 2026 EMOTIONAL ORANGES</span>
+        <a href="#">이용약관</a>
+        <a class="is-strong" href="https://emotional0ranges.com/privacy" data-sheet-open="privacy-sheet">개인정보처리방침</a>
+        <a href="#">환불 규정</a>
+      </p>
+      <p class="footer__meta">
+        <span>주식회사 감정적인오렌지들</span>
+        <span>대표이사 권준혁</span>
+        <span>사업자등록번호 480-88-03308</span>
+        <span>법인등록번호 284111-0437652</span>
+        <span>결혼정보업체신고번호 경기-남양-국내-24-0001호</span>
+        <span>통신판매업신고번호 2024-별내-0651</span>
+        <span>대표번호 0502-1922-2274 (공식문의 채널톡)</span>
+        <span>고객센터 평일 10:00–19:00 (주말 및 공휴일 제외)</span>
+        <span>협업 및 비즈니스 제안 partner@emotional0ranges.com</span>
+        <span>채용 문의 recruit@emotional0ranges.com</span>
+        <span>개인정보보호책임자 권준혁 markkwon@emotional0ranges.com</span>
+        <span>서울특별시 용산구 대사관로31길 7-2(한남동), 4층</span>
+        <span>경기도 남양주시 별내중앙로 34(별내동), 502호</span>
+      </p>
+    </div>
+    <ul class="footer__sns">
+      <li><a class="is-instagram" href="https://www.instagram.com/emotional_0ranges" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 (새 창)"><img src="./logo/sns/instagram.png" alt=""></a></li>
+      <li><a class="is-naver-blog" href="https://blog.naver.com/emotional0ranges" target="_blank" rel="noopener noreferrer" aria-label="네이버 블로그 (새 창)"><img src="./logo/sns/naver-blog.png" alt=""></a></li>
+      <li><a href="https://www.somoim.co.kr/4b897e56-f085-11ed-85ea-0a4f64b569631" target="_blank" rel="noopener noreferrer" aria-label="소모임 (새 창)"><img src="./logo/sns/somoim.png" alt=""></a></li>
+    </ul>
+  </footer>
+</div>
+
+
+<!-- 안내 사항의 "자세히 알아보기"가 엽니다. 묻는 창이 아니라 읽고 닫는 창이라
+     아래 버튼 줄 없이 오른쪽 위에 닫기만 둡니다. -->
+<dialog class="confirm" id="refund-policy" aria-labelledby="refund-policy-title">
+  <div class="confirm__panel">
+    <h2 id="refund-policy-title">환불 정책</h2>
+    <div class="confirm__body">
+      <p>환불 금액은 모임 시작일과 실제 결제금액을 기준으로 계산됩니다.</p>
+      <ul>
+        <li>10일 전까지: 결제금액 100% 환불</li>
+        <li>7~9일 전: 결제금액 70% 환불</li>
+        <li>5~6일 전: 결제금액 50% 환불</li>
+        <li>4일 전부터 당일까지: 환불 불가</li>
+      </ul>
+    </div>
+    <button class="btn btn--ghost btn--medium btn--icon-only confirm__close" type="button"
+            data-confirm-close aria-label="닫기">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+  </div>
+</dialog>
+
+<!-- 알림은 결제도 좌석 확보도 아닙니다. 자리가 열리면 알려준다는 것과, 그 뒤는
+     선착순이라는 것을 먼저 말합니다. -->
+<dialog class="confirm" id="seat-alert-apply" aria-labelledby="seat-alert-apply-title">
+  <div class="confirm__panel">
+    <div class="confirm__text">
+      <h2 id="seat-alert-apply-title">자리가 생기면 알려드릴게요</h2>
+      <p>취소 자리가 생기면 알려드려요.<br>알림 후 결제는 선착순으로 마감될 수 있어요.</p>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-confirm-close>
+        <span class="btn__label">닫기</span>
+      </button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept>
+        <span class="btn__label">빈자리 알림 받기</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 되돌리는 쪽(알림 취소)이 왼쪽에 섭니다. 큰 버튼을 무심코 눌렀을 때 알림이
+     꺼지면 안 됩니다. -->
+<dialog class="confirm" id="seat-alert-cancel" aria-labelledby="seat-alert-cancel-title">
+  <div class="confirm__panel">
+    <div class="confirm__text">
+      <h2 id="seat-alert-cancel-title">빈자리 알림을 취소할까요?</h2>
+      <p>취소하면 빈자리 알림을 받을 수 없어요.<br>언제든 다시 신청할 수 있어요.</p>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-confirm-accept>
+        <span class="btn__label">알림 취소</span>
+      </button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-close>
+        <span class="btn__label">계속 알림 받기</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 찜은 계정에 남는 것이라 로그인한 사람만 할 수 있습니다. 누른 자리에서 바로
+     로그인 화면으로 보내지 않고 한 번 묻습니다 — 읽던 자리를 잃지 않고 돌아설 수
+     있어야 합니다. 비로그인 상태는 detail.html?login=guest 로 볼 수 있습니다. -->
+<!-- 고른 일정에 확정된 사람들. 안은 participants.js 가 채웁니다 — 같은 목록이 카드
+     요약과 이 창 두 곳에 나오는데, 마크업에 적어두면 둘이 갈립니다. -->
+<dialog class="confirm participants" id="participants" aria-labelledby="participants-title">
+  <div class="confirm__panel">
+    <h2 id="participants-title">참여자 구성</h2>
+    <div class="participants__body">
+      <p class="participants__when">
+        <span>선택한 일정</span>
+        <span data-participants-when></span>
+      </p>
+      <div class="participants__cols"></div>
+      <p class="participants__note">참여자의 연령대와 직업군만 공개하며, 개인을 식별할 수 있는 정보는 제공하지 않아요.</p>
+    </div>
+    <button class="btn btn--ghost btn--medium btn--icon-only confirm__close" type="button"
+            data-confirm-close aria-label="닫기">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+  </div>
+</dialog>
+
+<dialog class="confirm" id="favorite-login" aria-labelledby="favorite-login-title">
+  <div class="confirm__panel">
+    <div class="confirm__text">
+      <h2 id="favorite-login-title">찜한 모임을 저장하려면<br>로그인이 필요해요</h2>
+    </div>
+    <div class="confirm__actions">
+      <button class="btn btn--outlined btn--large" type="button" data-confirm-close>
+        <span class="btn__label">취소</span>
+      </button>
+      <button class="btn btn--filled btn--large" type="button" data-confirm-accept>
+        <span class="btn__label">로그인하기</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 좁은 화면에서만 보입니다. 누르면 위의 일정 목록이 시트로 올라옵니다. -->
+<div class="bottom-cta">
+  <button class="btn btn--filled btn--large" data-sheet-open="apply-sheet">
+    <span class="btn__label">신청하기</span>
+  </button>
+</div>
+<dialog class="image-viewer" id="detail-photos" data-view="list" aria-label="티키타카 로테이션 소개팅 사진">
+  <div class="top-bar image-viewer__bar">
+    <button class="btn btn--ghost btn--medium btn--icon-only image-viewer__close" aria-label="닫기">
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+    <p class="top-bar__label image-viewer__title body-m-medium">티키타카 로테이션 소개팅</p>
+    <p class="top-bar__label image-viewer__count body-m-medium" aria-live="polite">1 / 5</p>
+    <button class="btn btn--ghost btn--medium btn--icon-only image-viewer__to-list" aria-label="사진 목록 보기" hidden>
+      <svg class="btn__icon" aria-hidden="true"><use href="#icon-window"></use></svg>
+    </button>
+  </div>
+
+  <div class="image-viewer__body">
+    <ul class="image-viewer__list">
+        <li>
+          <button class="image-viewer__thumb" aria-label="1번째 사진 크게 보기">
+            <img src="./images/detail-photo-1.jpg" alt="조명이 놓인 테이블에서 마주 앉아 대화하는 두 사람" width="2000" height="1333" loading="lazy">
+          </button>
+        </li>
+        <li>
+          <button class="image-viewer__thumb" aria-label="2번째 사진 크게 보기">
+            <img src="./images/detail-photo-2.jpg" alt="턴테이블에 레코드를 올려둔 라운지 한켠" width="2000" height="1333" loading="lazy">
+          </button>
+        </li>
+        <li>
+          <button class="image-viewer__thumb" aria-label="3번째 사진 크게 보기">
+            <img src="./images/detail-photo-3.jpg" alt="기둥 사이 자리에서 이야기를 나누는 참가자들" width="1500" height="2000" loading="lazy">
+          </button>
+        </li>
+        <li>
+          <button class="image-viewer__thumb" aria-label="4번째 사진 크게 보기">
+            <img src="./images/detail-photo-4.jpg" alt="벽돌벽 앞 테이블에서 프로필 카드를 함께 보는 두 사람" width="2000" height="1332" loading="lazy">
+          </button>
+        </li>
+        <li>
+          <button class="image-viewer__thumb" aria-label="5번째 사진 크게 보기">
+            <img src="./images/detail-photo-5.jpg" alt="작은 조명 아래 음료를 두고 마주한 손" width="2000" height="1333" loading="lazy">
+          </button>
+        </li>
+    </ul>
+
+    <div class="image-viewer__single">
+      <button class="btn btn--blur btn--large btn--icon-only image-viewer__nav image-viewer__nav--prev" aria-label="이전 사진">
+        <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronLeft"></use></svg>
+      </button>
+      <!-- 옆으로 미끄러져 넘어가려면 다음 장이 이미 옆에 서 있어야 합니다. 목록과 같은
+           파일이라 새로 받지 않고, 미끄러지는 것은 브라우저의 스크롤이 합니다. -->
+      <div class="image-viewer__strip">
+        <div class="image-viewer__frame"><img src="./images/detail-photo-1.jpg" alt="조명이 놓인 테이블에서 마주 앉아 대화하는 두 사람"></div>
+        <div class="image-viewer__frame"><img src="./images/detail-photo-2.jpg" alt="턴테이블에 레코드를 올려둔 라운지 한켠"></div>
+        <div class="image-viewer__frame"><img src="./images/detail-photo-3.jpg" alt="기둥 사이 자리에서 이야기를 나누는 참가자들"></div>
+        <div class="image-viewer__frame"><img src="./images/detail-photo-4.jpg" alt="벽돌벽 앞 테이블에서 프로필 카드를 함께 보는 두 사람"></div>
+        <div class="image-viewer__frame"><img src="./images/detail-photo-5.jpg" alt="작은 조명 아래 음료를 두고 마주한 손"></div>
+      </div>
+      <button class="btn btn--blur btn--large btn--icon-only image-viewer__nav image-viewer__nav--next" aria-label="다음 사진">
+        <svg class="btn__icon" aria-hidden="true"><use href="#icon-chevronRight"></use></svg>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  // 뒤로 돌아온 화면은 맨 위에서 시작합니다.
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  // 일정·후기를 읽는 스크립트들보다 먼저 돕니다. 그들이 세어둔 뒤에 목록을
+  // 갈아끼우면 서로 다른 것을 보게 됩니다.
+  const { initProduct } = await import('./components/product.js?v=b9af7b6a')
+  initProduct()
+  const { initSchedule } = await import('./components/schedule.js?v=a9e9003f')
+  initSchedule()
+  // 상세는 목록에서 들어오는 화면이라 뒤로가 곧 목록입니다. 열자마자 눌렀다면
+  // 돌아갈 곳이 없으므로 홈으로 보냅니다 — 그 길은 data-back 에 적혀 있습니다.
+  const { initBack } = await import('./components/back.js?v=c6d259cc')
+  initBack()
+  const { initRecentReview } = await import('./components/recent-review.js?v=57fdf519')
+  initRecentReview()
+  const { initConfirms } = await import('./components/confirm.js?v=f516d2db')
+  initConfirms()
+  const { initParticipants } = await import('./components/participants.js?v=83db421f')
+  initParticipants()
+  const { initSeatAlert } = await import('./components/seat-alert.js?v=1bc45aee')
+  initSeatAlert()
+  const { initDiscounts } = await import('./components/discount.js?v=33cdc5c0')
+  initDiscounts()
+  const { initFavorites } = await import('./components/favorite.js?v=8480b907')
+  initFavorites()
+  // 비슷한 모임 카드도 목록과 같은 데이터에서 지역·일정 수를 받습니다.
+  const { initProductCards } = await import('./components/product-cards.js?v=9fe45dac')
+  initProductCards()
+  const { initDetailIntro } = await import('./components/detail-intro.js?v=c2d2bd44')
+  initDetailIntro()
+  const { initTabs } = await import('./components/tabs.js?v=aec7319a')
+  initTabs()
+  const { initImageViewers } = await import('./components/image-viewer.js?v=cfe816fb')
+  initImageViewers()
+  const { initSheets } = await import('./components/sheet.js?v=30835160')
+  initSheets()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>

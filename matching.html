@@ -1,0 +1,204 @@
+<!doctype html>
+<!-- 매칭 — 내가 신청한 모임을 때에 따라 셋으로 나눠 봅니다.
+     지금은 셋 다 비어 있습니다. 신청한 모임을 들고 있는 자리가 아직 없어서인데,
+     빈 상태와 그 아래 목록이 들어올 자리는 matching.js 한 곳에 있습니다. -->
+<meta charset="utf-8">
+<script src="./components/theme-transition.js?v=4d65c259"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Safari 는 숫자 나열을 전화번호로 보고 스스로 링크를 겁니다. -->
+<meta name="format-detection" content="telephone=no">
+<!-- 파비콘 · 앱 아이콘 (README 의 "파비콘"). 모든 페이지가 같은 묶음입니다. -->
+<link rel="icon" href="./favicon/favicon.ico" sizes="32x32">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon/apple-touch-icon.png">
+<link rel="manifest" href="./favicon/site.webmanifest">
+<link rel="mask-icon" href="./favicon.svg" color="#F75D15">
+<meta name="theme-color" content="#FFFFFF">
+<title>매칭 — 감정적인 오렌지들</title>
+<link rel="stylesheet" href="./fonts/pretendard/pretendard.css?v=2973bcae">
+<link rel="stylesheet" href="./build/tokens.css?v=4e678c37">
+<link rel="stylesheet" href="./components/container.css?v=4c7ad1f5">
+<link rel="stylesheet" href="./components/badge.css?v=daa79c09">
+<link rel="stylesheet" href="./components/button.css?v=323be71f">
+<link rel="stylesheet" href="./components/cookie-consent.css?v=73630604">
+<link rel="stylesheet" href="./components/sheet.css?v=29f9252c">
+<link rel="stylesheet" href="./components/privacy-sheet.css?v=dc4bcfb3">
+<link rel="stylesheet" href="./components/gnb.css?v=29d333a9">
+<link rel="stylesheet" href="./components/segmented-control.css?v=4e1ad9fc">
+<link rel="stylesheet" href="./components/tooltip.css?v=a9f2c6c0">
+<link rel="stylesheet" href="./components/my-menu.css?v=59a441fb">
+<link rel="stylesheet" href="./components/toast.css?v=3cce3a3d">
+<link rel="stylesheet" href="./components/tabs.css?v=a962487a">
+<link rel="stylesheet" href="./components/empty-state.css?v=c723dc10">
+<link rel="stylesheet" href="./components/matching.css?v=710fe99d">
+<link rel="stylesheet" href="./components/footer.css?v=090dd8fc">
+<link rel="stylesheet" href="./components/app-bar.css?v=1129f720">
+<style>
+  body {
+    margin: 0;
+    background: var(--colors-bg);
+    color: var(--colors-fg);
+    font-family: var(--_font-family-base);
+    /* 아직 목록이 없어 본문이 짧습니다. 그대로 두면 푸터가 화면 한가운데에 서서
+       페이지가 끊긴 것처럼 보입니다 — 본문이 남는 높이를 가져가고 푸터는 아래에
+       머뭅니다(Figma 도 빈 영역이 남는 높이를 채웁니다). */
+    min-block-size: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  .matching { flex: 1 0 auto; }
+  /* 화면에는 안 보이지만 스크린리더는 읽는 텍스트 */
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+  }
+</style>
+
+<div id="sprite" hidden></div>
+
+<!-- 다른 화면과 같은 GNB 입니다. -->
+<header class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__side gnb__side--start">
+      <a class="gnb__logo" href="./index.html" aria-label="감정적인 오렌지들 홈">
+        <svg width="126" height="40" role="img" aria-label="emotional oranges"><use href="#logo-eo"></use></svg>
+      </a>
+    </div>
+    <div class="gnb__center">
+      <div class="gnb__segmented">
+        <!-- 로테이션(오프라인 모임)과 프라이빗(온라인 매칭)은 서로 다른 화면으로 가는 길입니다.
+             고르는 탭이 아니라 링크라서 둘 다 Tab 으로 닿습니다. 메뉴는 어느 쪽에서든 같습니다.
+             프라이빗 화면(온라인 프로필 등록)은 아직 배포하지 않아, 배포된 사이트에서는 누르면
+             "준비 중" 알림만 띄우고 로컬 미리보기에서만 열립니다(data-local-only). -->
+        <nav class="segmented" aria-label="소개 형태">
+          <span class="segmented__thumb" aria-hidden="true"></span>
+          <a class="segmented__item is-selected" aria-current="page" href="./index.html">로테이션</a>
+          <a class="segmented__item" href="./profile-extra.html" data-local-only>프라이빗</a>
+        </nav>
+      </div>
+      <nav class="gnb__menu" aria-label="주요 메뉴">
+        <a class="btn btn--ghost btn--medium" href="./meetups.html"><span class="btn__label">모임</span></a>
+        <a class="btn btn--ghost btn--medium" href="./matching.html" aria-current="page"><span class="btn__label">매칭</span></a>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">모임 후기</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">자주 묻는 질문</span></button>
+        <button class="btn btn--ghost btn--medium"><span class="btn__label">저널</span></button>
+      </nav>
+    </div>
+    <div class="gnb__side gnb__side--end">
+      <div class="gnb__actions">
+        <button class="btn btn--blur btn--medium gnb__login" type="button">
+          <span class="btn__label">로그인</span>
+        </button>
+        <button class="btn btn--ghost btn--medium btn--icon-only gnb__notify" aria-label="알림">
+          <svg class="btn__icon" aria-hidden="true"><use href="#icon-notifications"></use></svg>
+          <!-- 읽지 않은 것이 있을 때만 점이 붙습니다(my-menu.js) — 목록의 알림 줄과
+               같은 값에서 나옵니다. -->
+        </button>
+        <div class="my-menu" data-my-menu>
+          <button class="btn btn--blur btn--medium btn--icon-only" type="button"
+                  data-my-menu-open aria-label="내 메뉴 열기"
+                  aria-expanded="false" aria-controls="my-menu-panel" aria-haspopup="true">
+            <svg class="btn__icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="my-menu__panel" id="my-menu-panel" role="menu" aria-label="내 메뉴" tabindex="-1" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="matching container" data-matching>
+  <h1 class="sr-only">매칭</h1>
+  <!-- 탭과 그 아래 내용은 matching.js 가 그립니다 — 탭 하나가 늘 때 이름만
+       늘어나고 그 아래 화면이 없는 일이 없도록 한 곳에서 나옵니다. -->
+  <nav class="tabs matching__tabs" data-matching-tabs aria-label="내 모임"></nav>
+  <div data-matching-body></div>
+</main>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer__info">
+      <p class="footer__links">
+        <span>© 2026 EMOTIONAL ORANGES</span>
+        <a href="#">이용약관</a>
+        <a class="is-strong" href="https://emotional0ranges.com/privacy" data-sheet-open="privacy-sheet">개인정보처리방침</a>
+        <a href="#">환불 규정</a>
+      </p>
+      <p class="footer__meta">
+        <span>주식회사 감정적인오렌지들</span>
+        <span>대표이사 권준혁</span>
+        <span>사업자등록번호 480-88-03308</span>
+        <span>법인등록번호 284111-0437652</span>
+        <span>결혼정보업체신고번호 경기-남양-국내-24-0001호</span>
+        <span>통신판매업신고번호 2024-별내-0651</span>
+        <span>대표번호 0502-1922-2274 (공식문의 채널톡)</span>
+        <span>고객센터 평일 10:00–19:00 (주말 및 공휴일 제외)</span>
+        <span>협업 및 비즈니스 제안 partner@emotional0ranges.com</span>
+        <span>채용 문의 recruit@emotional0ranges.com</span>
+        <span>개인정보보호책임자 권준혁 markkwon@emotional0ranges.com</span>
+        <span>서울특별시 용산구 대사관로31길 7-2(한남동), 4층</span>
+        <span>경기도 남양주시 별내중앙로 34(별내동), 502호</span>
+      </p>
+    </div>
+    <ul class="footer__sns">
+      <li><a class="is-instagram" href="https://www.instagram.com/emotional_0ranges" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 (새 창)"><img src="./logo/sns/instagram.png" alt=""></a></li>
+      <li><a class="is-naver-blog" href="https://blog.naver.com/emotional0ranges" target="_blank" rel="noopener noreferrer" aria-label="네이버 블로그 (새 창)"><img src="./logo/sns/naver-blog.png" alt=""></a></li>
+      <li><a href="https://www.somoim.co.kr/4b897e56-f085-11ed-85ea-0a4f64b569631" target="_blank" rel="noopener noreferrer" aria-label="소모임 (새 창)"><img src="./logo/sns/somoim.png" alt=""></a></li>
+    </ul>
+  </footer>
+</div>
+
+<!-- 아래로 읽어 내려가는 동안에는 물러납니다(auto-hide.js) — 다른 화면과 같습니다. -->
+<nav class="app-bar app-bar--fixed" data-auto-hide="down" aria-label="주요 메뉴">
+  <a class="app-bar__item" href="./index.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-home"></use></svg>
+    <span class="app-bar__label">홈</span>
+  </a>
+  <a class="app-bar__item" href="./meetups.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-explorer"></use></svg>
+    <span class="app-bar__label">탐색</span>
+  </a>
+  <a class="app-bar__item is-active" href="./matching.html" aria-current="page">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-matchFilled"></use></svg>
+    <span class="app-bar__label">매칭</span>
+  </a>
+  <a class="app-bar__item" href="#">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-cardStar"></use></svg>
+    <span class="app-bar__label">추천</span>
+  </a>
+  <a class="app-bar__item" href="./my.html">
+    <svg class="app-bar__icon" aria-hidden="true"><use href="#icon-my"></use></svg>
+    <span class="app-bar__label">마이</span>
+  </a>
+</nav>
+
+<script type="module">
+  document.getElementById('sprite').innerHTML =
+    await (await fetch('./build/icons.svg?v=4a0d8096')).text() + await (await fetch('./build/logo.svg?v=0adc0440')).text()
+  await import('./components/scroll-restore.js?v=f612a7a5')
+  const { initStickyGnb } = await import('./components/gnb.js?v=ca09b963')
+  initStickyGnb()
+  const { initSegmentedControls } = await import('./components/segmented-control.js?v=305fe1a2')
+  initSegmentedControls()
+  const { initAutoHide } = await import('./components/auto-hide.js?v=ef9c163a')
+  initAutoHide()
+  const { initAppBarPress } = await import('./components/app-bar.js?v=6deb1462')
+  initAppBarPress()
+  const { initMyMenus } = await import('./components/my-menu.js?v=fe953b87')
+  initMyMenus()
+  // 탭 항목이 생긴 뒤라야 밑줄이 잴 것이 있습니다 — 차례가 바뀌면 밑줄이 0 에서
+  // 시작해 첫 탭으로 날아옵니다.
+  const { initMatching } = await import('./components/matching.js?v=fb33e3a0')
+  initMatching()
+  const { initTabs } = await import('./components/tabs.js?v=aec7319a')
+  initTabs()
+</script>
+<script type="module">
+  // 개인정보 처리방침은 화면을 떠나지 않고 시트로 읽습니다(쿠키 카드·푸터).
+  const { initPrivacySheet } = await import('./components/privacy-sheet.js?v=c0fc73f2')
+  initPrivacySheet()
+  // 광고 쿠키를 아직 고르지 않은 사람에게만 화면 아래에 묻는 카드를 띄웁니다.
+  const { initCookieConsent } = await import('./components/cookie-consent.js?v=0db68229')
+  initCookieConsent()
+</script>
